@@ -27,12 +27,17 @@
       <div class="age-round">18+</div>
       <p class="eyebrow">AFTER DARK · ESPACE 18+</p>
       <h1 id="age-title">LA NUIT<br><em>COMMENCE ICI.</em></h1>
-      <p>Site réservé aux personnes de 18 ans et plus. Confirme ton âge une seule fois sur cet appareil pour ouvrir les vidéos directement. Cette déclaration ne remplace pas une vérification légale obligatoire.</p>
-      <div class="gate-actions">
-        <button id="enter" type="button" class="button button-hot">J’ai 18 ans ou plus · Continuer</button>
-        <a class="button button-ghost" href="https://rickykaimpstudio.com/">Quitter</a>
-      </div>
-      <small>Publications, paiements et outils réservés aux partenaires et contenus autorisés. Aucune dépense imposée.</small>
+      <p class="age-intro">Ce site contient des vidéos et des services réservés aux personnes de <strong>18 ans et plus</strong>. Entre ta date de naissance pour confirmer que tu es majeur.</p>
+      <form id="age-form" class="age-form" autocomplete="off" novalidate>
+        <label for="birthdate">Date de naissance</label>
+        <input id="birthdate" name="birthdate" type="date" min="1900-01-01" required aria-describedby="age-error age-privacy">
+        <p id="age-error" class="age-error" role="alert" aria-live="polite"></p>
+        <div class="gate-actions">
+          <button id="enter" type="submit" class="button button-hot">Confirmer mes 18 ans et entrer</button>
+          <a class="button button-ghost" href="https://www.google.ca/">Quitter</a>
+        </div>
+      </form>
+      <small id="age-privacy">La date est vérifiée sur ton appareil et n'est pas enregistrée ni envoyée au site. Seule la confirmation de majorité est mémorisée pendant 30 jours. Une déclaration ne remplace pas une vérification d'âge officielle, si la loi l'exige.</small>
     </div>
   </div>
 
