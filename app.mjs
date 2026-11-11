@@ -150,6 +150,18 @@ async function loadFeed(append=false){
         if(!payload)payload=candidate;
       }catch(error){firstError ||= error;}
     }
+    // Static emergency snapshot: real supplier metadata, refreshed by GitHub Actions.
+    // When a mobile browser or server blocks the live API, visitors still see previews.
+    if(!incoming.length && state.page === 1 && !controller.signal.aborted) {
+      try {
+        const snapshotResponse = await fetch('./catalog.json',{cache:'no-store',signal:controller.signal});
+        if(snapshotResponse.ok) {
+          const snapshot = await snapshotResponse.json();
+          const recovered = cleanProviderResult(snapshot).filter(v=>validProviderPlayer(videoId(v)));
+          if(recovered.length){payload={...snapshot,next:null,__snapshot:true};incoming=recovered;}
+        }
+      } catch { /* last-resort snapshot unavailable */ }
+    }
     if(!payload)throw firstError || new Error('Catalogue indisponible');
     if(token!==state.request)return;
     const known=new Set(state.items.map(x=>x.key));
@@ -157,7 +169,7 @@ async function loadFeed(append=false){
     state.total=Number.isSafeInteger(Number(payload?.count))?Number(payload.count):state.items.length;
     state.hasNext=!!payload?.next&&incoming.length>0;
     if(state.items.length){
-      $('feed-badge').textContent='● VIDÉOS DISPONIBLES';
+      $('feed-badge').textContent=payload?.__snapshot ? '● VIDÉOS DE SECOURS' : '● VIDÉOS DISPONIBLES';
       renderVideos();
       $('catalog-state').hidden=true;
       if(!state.feature)featureVideo(state.items.find(v=>v.thumbnail));
