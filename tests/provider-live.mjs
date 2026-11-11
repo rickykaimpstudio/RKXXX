@@ -19,5 +19,12 @@ if(!valid)throw new Error('Provider did not return valid catalogue items');
 const normalized = cleanProviderResult(data);
 console.log('Player cards parsed:',normalized.length);
 console.log('Cards with thumbnails:',normalized.filter(row=>!!row.thumbnail).length);
+for(const v of data.results.slice(0,2)){
+  const value=v.thumbnail ?? v.thumbnail_url ?? v.thumbnails ?? v.poster ?? v.image ?? null;
+  const u=typeof value==='string' ? (()=>{try{const p=new URL(value);return p.hostname+p.pathname.slice(0,80)}catch{return value.slice(0,80)}})() : JSON.stringify(value)?.slice(0,150);
+  console.log('Thumbnail source shape:', typeof value, u);
+  console.log('Metadata keys:',Object.keys(v).join(','));
+}
+
 if(!normalized.length)throw new Error('Normalization rejected real provider cards');
 console.log('Catalogue public partenaire: métadonnées disponibles.');
