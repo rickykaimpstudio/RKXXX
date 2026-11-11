@@ -31,3 +31,5 @@ console.log('Catalogue public partenaire: métadonnées disponibles.');
 
 console.log('Thumbnail URL protocols:', [...new Set(data.results.map(r=>{try{return new URL(r.thumbnail).protocol}catch{return 'invalide'}}))].join(','));
 console.log('Thumbnail hosts:',[...new Set(data.results.map(r=>{try{return new URL(r.thumbnail).hostname}catch{return 'invalide'}}))].join(','));
+
+console.log('Thumbnail path prefixes:',[...new Set(data.results.map(r=>{try{const u=new URL(r.thumbnail);return u.hostname+' '+u.pathname.split('/').slice(0,3).join('/')}catch{return 'invalide'}}))].join(' | '));
