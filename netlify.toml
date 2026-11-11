@@ -1,0 +1,5 @@
+[build]
+  publish = "."
+
+# Site statique : le HTML, les modules JS et la CSS sont a la racine.
+# Ne pas pointer vers le site Lovable de Ricky Kaimp Studio.
