@@ -13,7 +13,10 @@ $('year').textContent = new Date().getFullYear().toString();
 
 let favorites = [];
 try { const v = JSON.parse(localStorage.getItem('rk-afterdark-favorites-v2') || '[]'); if (Array.isArray(v)) favorites = v.filter(Number.isSafeInteger).slice(0,300); } catch { /* private browsing */ }
-const state = { items: [], category: 'all', sort: 'newest', search: '', page: 1, total: 0, hasNext: false, loading: false, request: 0, active: false, favOnly: false, current: null, feature: null };
+const AGE_CONSENT_KEY = 'rk-afterdark-adult-confirmed-v1';
+let ageConfirmed = false;
+try { ageConfirmed = localStorage.getItem(AGE_CONSENT_KEY) === 'yes'; } catch { /* browsing in private mode */ }
+const state = { items: [], category: 'all', sort: 'newest', search: '', page: 1, total: 0, hasNext: false, loading: false, request: 0, active: true, ageConfirmed, favOnly: false, current: null, feature: null };
 const isFav = (id) => favorites.includes(id);
 function element(tag, className = '', text = '') {
   const node = document.createElement(tag);
@@ -50,11 +53,11 @@ function renderVideos() {
   const root = $('video-grid'); root.replaceChildren();
   $('favorites-only').setAttribute('aria-pressed',String(state.favOnly));
   const shown = state.items.filter(x=>!state.favOnly || isFav(Number(x.key.replace('adultembed-',''))));
-  for(const v of shown) {
+  for(const [index,v] of shown.entries()) {
     const id = Number(v.key.replace('adultembed-',''));
     const card = element('article','video-card');
     const cover = element('button','video-cover'); cover.type='button'; cover.setAttribute('aria-label',`Lire la vidéo : ${v.title}`);
-    if(v.thumbnail){const img=element('img');img.src=v.thumbnail;img.alt='Aperçu de la vidéo';img.loading='lazy';img.decoding='async';img.referrerPolicy='strict-origin-when-cross-origin';img.addEventListener('error',()=>{cover.classList.add('image-unavailable');}); cover.append(img);} else {cover.classList.add('image-unavailable');}
+    if(v.thumbnail){const img=element('img');img.src=v.thumbnail;img.alt='Aperçu de la vidéo';img.loading=index<6?'eager':'lazy';if(index<4)img.fetchPriority='high';img.decoding='async';img.referrerPolicy='strict-origin-when-cross-origin';img.addEventListener('error',()=>{img.remove();cover.classList.add('image-unavailable');}); cover.append(img);} else {cover.classList.add('image-unavailable');}
     const play=element('span','video-play','▶');cover.append(play);
     const duration=formatDuration(v.durationSeconds); if(duration)cover.append(element('span','video-duration',duration));
     cover.addEventListener('click',()=>openVideo(v));
@@ -79,10 +82,15 @@ function featureVideo(v){
 }
 const videoId=v=>Number(v.key.replace('adultembed-',''));
 function openVideo(v){
-  if (!state.active || !validProviderPlayer(videoId(v))) return;
+  if (!state.active || !state.ageConfirmed || !validProviderPlayer(videoId(v))) return;
+  // The provider supports muted autoplay. One thumbnail tap starts the player
+  // without a second After Dark confirmation. The player itself stays provider-owned.
+  const url=new URL(validProviderPlayer(videoId(v)));
+  url.searchParams.set('autoplay','1');
+  url.searchParams.set('muted','1');
   state.current = v;
   const frame=element('iframe');
-  frame.src=validProviderPlayer(videoId(v));
+  frame.src=url.href;
   frame.title=v.title;
   frame.loading='eager';
   frame.referrerPolicy='strict-origin-when-cross-origin';
@@ -119,6 +127,25 @@ async function loadFeed(append=false){
   const controller=new AbortController();
   activeFeedController=controller;
   const timeout=setTimeout(()=>controller.abort(),15000);
+  // Show a real, locally deployed backup feed within the first paint of the catalogue.
+  // The live provider request still runs and replaces it when fresh results arrive.
+  let shownSnapshot=false;
+  if(!append && !state.search.trim() && state.category==='all' && state.sort==='newest'){
+    try{
+      const backupResponse=await fetch('/catalog.json',{cache:'force-cache',signal:controller.signal});
+      if(backupResponse.ok){
+        const backup=await backupResponse.json();
+        const initial=cleanProviderResult(backup).filter(v=>validProviderPlayer(videoId(v)));
+        if(initial.length && token===state.request){
+          state.items=initial;
+          state.total=initial.length;
+          shownSnapshot=true;
+          $('feed-badge').textContent='● VIDÉOS DISPONIBLES';
+          renderVideos();
+        }
+      }
+    } catch { /* live API will still be tried */ }
+  }
   const buildUrl=(base,v1=false)=>{
     const u=new URL(base);
     u.searchParams.set('page',String(state.page));
@@ -164,6 +191,7 @@ async function loadFeed(append=false){
     }
     if(!payload)throw firstError || new Error('Catalogue indisponible');
     if(token!==state.request)return;
+    if(shownSnapshot && incoming.length && !payload?.__snapshot) state.items=[];
     const known=new Set(state.items.map(x=>x.key));
     for(const v of incoming)if(!known.has(v.key)){state.items.push(v);known.add(v.key);}
     state.total=Number.isSafeInteger(Number(payload?.count))?Number(payload.count):state.items.length;
@@ -200,12 +228,29 @@ $('sort').addEventListener('change', e=>{state.sort=['newest','popular','longest
 $('favorites-only').addEventListener('click',()=>{state.favOnly=!state.favOnly;renderVideos();});
 $('retry-feed').addEventListener('click',()=>loadFeed(false));
 $('load-more').addEventListener('click',()=>{if(state.loading||!state.hasNext)return;state.page+=1;loadFeed(true);});
+if('IntersectionObserver' in window) {
+  const autoLoad = new IntersectionObserver((entries)=>{
+    if(entries.some(entry=>entry.isIntersecting) && state.hasNext && !state.loading && state.ageConfirmed && !state.favOnly){
+      $('load-more').click();
+    }
+  },{rootMargin:'700px'});
+  autoLoad.observe($('load-more'));
+}
 setCategories();renderVideos();
+// Load thumbnails immediately while showing a one-time age notice for new visitors.
+// No second age question belongs to our video player.
+gate.hidden = state.ageConfirmed;
+app.inert = !state.ageConfirmed;
 $('enter').addEventListener('click',()=>{
-  gate.hidden=true;app.inert=false;state.active=true;
+  state.ageConfirmed=true;
+  try { localStorage.setItem(AGE_CONSENT_KEY,'yes'); } catch { /* private mode */ }
+  gate.hidden=true;
+  app.inert=false;
   window.scrollTo({top:0,behavior:'instant'});
-  loadFeed(false);
+  $('search').focus({preventScroll:true});
+  $('search').blur();
 });
+void loadFeed(false);
 
 const el = element;
 
