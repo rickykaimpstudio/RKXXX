@@ -1,6 +1,12 @@
 /** Provider metadata only. Never downloads media; no account key required for public API. */
 export const SOURCE = 'https://adultembed.com';
-const THUMB_DOMAINS = new Set(['adultembed.com', 'www.adultembed.com']);
+// These HTTPS thumbnail origins and prefixes were observed in the provider's real API.
+const THUMB_PATHS = new Map([
+  ['adultembed.com','/media/thumbnails/'],
+  ['www.adultembed.com','/media/thumbnails/'],
+  ['imgds.net','/snaps/'],
+  ['pornalizer.app','/media/thumbnails/']
+]);
 
 function cleanString(value, max = 140) {
   return typeof value === 'string' ? value.replace(/[\x00-\x1f\x7f]/g, ' ').trim().slice(0, max) : '';
@@ -15,8 +21,8 @@ export function safeProviderThumbnail(value) {
   try {
     const url = new URL(value);
     if (url.protocol !== 'https:' || url.username || url.password || url.port) return null;
-    if (!THUMB_DOMAINS.has(url.hostname.toLowerCase())) return null;
-    if (!url.pathname.startsWith('/media/thumbnails/')) return null;
+    const prefix=THUMB_PATHS.get(url.hostname.toLowerCase());
+    if (!prefix || !url.pathname.startsWith(prefix)) return null;
     return url.href;
   } catch { return null; }
 }
