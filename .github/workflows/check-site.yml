@@ -2,7 +2,7 @@ name: Vérifier le site After Dark
 on:
   push:
     paths:
-      - "*.mjs"
+      - "**/*.mjs"
       - "*.html"
       - "*.css"
       - "netlify.toml"
@@ -15,14 +15,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Vérifier les modules JavaScript
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Valider les modules
         shell: bash
         run: |
           set -euo pipefail
-          for file in *.mjs; do
-            node --check "$file"
-          done
-          grep -q 'app.mjs' index.html
-          grep -q 'styles.css' index.html
-          test -s _headers
-          test -s netlify.toml
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find . -type f -name '*.mjs' -not -path './dist/*' -print0)
+          node --test tests/*.test.mjs
+          node tools/prepare-public.mjs
+          test -s dist/index.html
+          test -s dist/app.mjs
+          test ! -e dist/netlify/functions/catalog.mjs
+          grep -q 'app.mjs' dist/index.html
+          test -s dist/_headers
