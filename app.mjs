@@ -13,9 +13,15 @@ $('year').textContent = new Date().getFullYear().toString();
 
 let favorites = [];
 try { const v = JSON.parse(localStorage.getItem('rk-afterdark-favorites-v2') || '[]'); if (Array.isArray(v)) favorites = v.filter(Number.isSafeInteger).slice(0,300); } catch { /* private browsing */ }
-const AGE_CONSENT_KEY = 'rk-afterdark-adult-confirmed-v1';
+// Privacy: store a time-limited adult declaration only; never retain full birth dates.
+const AGE_CONSENT_KEY = 'rk-afterdark-age-declaration-v2';
+const AGE_DECLARATION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 let ageConfirmed = false;
-try { ageConfirmed = localStorage.getItem(AGE_CONSENT_KEY) === 'yes'; } catch { /* browsing in private mode */ }
+try {
+  const stamp = Number(localStorage.getItem(AGE_CONSENT_KEY));
+  ageConfirmed = Number.isFinite(stamp) && stamp > 0 &&
+    stamp <= Date.now() && Date.now() - stamp < AGE_DECLARATION_TTL_MS;
+} catch { /* browsing in private mode */ }
 const state = { items: [], category: 'all', sort: 'newest', search: '', page: 1, total: 0, hasNext: false, loading: false, request: 0, active: true, ageConfirmed, favOnly: false, current: null, feature: null };
 const isFav = (id) => favorites.includes(id);
 function element(tag, className = '', text = '') {
@@ -237,20 +243,50 @@ if('IntersectionObserver' in window) {
   autoLoad.observe($('load-more'));
 }
 setCategories();renderVideos();
-// Load thumbnails immediately while showing a one-time age notice for new visitors.
-// No second age question belongs to our video player.
+// Restricted material is not fetched or displayed before the declaration.
 gate.hidden = state.ageConfirmed;
 app.inert = !state.ageConfirmed;
-$('enter').addEventListener('click',()=>{
+document.body.classList.toggle('age-locked', !state.ageConfirmed);
+
+function ageOnCalendarDate(value, today = new Date()) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!m) return null;
+  const y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
+  if (y < 1900 || mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+  const date = new Date(y, mo - 1, d);
+  if (date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== d) return null;
+  const currentY=today.getFullYear(), currentM=today.getMonth()+1, currentD=today.getDate();
+  let years = currentY - y;
+  if (mo > currentM || (mo === currentM && d > currentD)) years -= 1;
+  return years >= 0 ? years : null;
+}
+const dobInput = $('birthdate');
+const ageError = $('age-error');
+const ageSubmit = $('enter');
+const today = new Date();
+dobInput.max = [today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
+$('age-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const years=ageOnCalendarDate(dobInput.value);
+  if (years === null) { ageError.textContent = 'Entre une date de naissance valide.'; return; }
+  if (years < 18) {
+    ageError.textContent = 'Accès refusé : ce site est réservé aux adultes de 18 ans ou plus.';
+    ageSubmit.disabled=true;
+    return;
+  }
+  // Confirmation only; local storage contains a timestamp, not a birth date.
   state.ageConfirmed=true;
-  try { localStorage.setItem(AGE_CONSENT_KEY,'yes'); } catch { /* private mode */ }
+  try { localStorage.setItem(AGE_CONSENT_KEY,String(Date.now())); } catch { /* private mode */ }
+  dobInput.value='';
+  ageError.textContent='';
   gate.hidden=true;
   app.inert=false;
+  document.body.classList.remove('age-locked');
   window.scrollTo({top:0,behavior:'instant'});
-  $('search').focus({preventScroll:true});
-  $('search').blur();
+  void loadFeed(false);
 });
-void loadFeed(false);
+dobInput.addEventListener('input', () => { ageError.textContent=''; ageSubmit.disabled=false; });
+if (state.ageConfirmed) void loadFeed(false);
 
 const el = element;
 
