@@ -4,6 +4,7 @@ import { cleanProviderResult, validProviderPlayer } from './adult-provider.mjs';
 // Public no-key API and permanent player URLs documented by the content provider.
 // Nothing is scraped, downloaded, copied, or served as a video file by After Dark.
 const API = 'https://adultembed.com/api/database/browse/';
+const BACKUP_API = 'https://adultembed.com/api/v1/search';
 const $ = (id) => document.getElementById(id);
 const gate = $('age-gate');
 const app = $('app');
@@ -52,7 +53,7 @@ function renderVideos() {
     const id = Number(v.key.replace('adultembed-',''));
     const card = element('article','video-card');
     const cover = element('button','video-cover'); cover.type='button'; cover.setAttribute('aria-label',`Lire la vidéo : ${v.title}`);
-    if(v.thumbnail){const img=element('img');img.src=v.thumbnail;img.alt='Aperçu de la vidéo';img.loading='lazy';img.decoding='async';img.referrerPolicy='strict-origin-when-cross-origin';img.addEventListener('error',()=>{cover.classList.add('image-unavailable');}); cover.append(img);}
+    if(v.thumbnail){const img=element('img');img.src=v.thumbnail;img.alt='Aperçu de la vidéo';img.loading='lazy';img.decoding='async';img.referrerPolicy='strict-origin-when-cross-origin';img.addEventListener('error',()=>{cover.classList.add('image-unavailable');}); cover.append(img);} else {cover.classList.add('image-unavailable');}
     const play=element('span','video-play','▶');cover.append(play);
     const duration=formatDuration(v.durationSeconds); if(duration)cover.append(element('span','video-duration',duration));
     cover.addEventListener('click',()=>openVideo(v));
@@ -107,7 +108,6 @@ let activeFeedController = null;
 async function loadFeed(append=false){
   if (!state.active) return;
   if (state.loading && append) return;
-  // Cancel an outdated search/filter request instead of silently losing the new query.
   if (state.loading) activeFeedController?.abort();
   state.loading=true;
   const token=++state.request;
@@ -115,32 +115,67 @@ async function loadFeed(append=false){
   $('feed-badge').textContent='◉ CHARGEMENT DES VIDÉOS';
   $('load-more').hidden=true;
   status('Chargement des vraies miniatures…','Connexion au catalogue vidéo partenaire.');
-  const u=new URL(API);
-  u.searchParams.set('page',String(state.page));u.searchParams.set('page_size','24');
-  u.searchParams.set('orientation','all');u.searchParams.set('sort',state.sort);
-  if(state.category!=='all')u.searchParams.set('content_type',state.category);
-  if(state.search.trim())u.searchParams.set('search',state.search.trim().slice(0,80));
-  const controller=new AbortController();activeFeedController=controller;const timeout=setTimeout(()=>controller.abort(),12000);
-  try{
-    const response=await fetch(u.href,{mode:'cors',credentials:'omit',cache:'no-store',redirect:'error',signal:controller.signal});
-    if(!response.ok)throw new Error(`Réponse ${response.status}`);
+  const controller=new AbortController();
+  activeFeedController=controller;
+  const timeout=setTimeout(()=>controller.abort(),15000);
+  const buildUrl=(base,v1=false)=>{
+    const u=new URL(base);
+    u.searchParams.set('page',String(state.page));
+    u.searchParams.set(v1?'per_page':'page_size','24');
+    u.searchParams.set('orientation','all');
+    u.searchParams.set('sort',state.sort);
+    if(v1)u.searchParams.set('quality','complete');
+    if(state.category!=='all')u.searchParams.set('content_type',state.category);
+    if(state.search.trim())u.searchParams.set(v1?'query':'search',state.search.trim().slice(0,80));
+    return u.href;
+  };
+  const requestFeed=async(base,v1=false)=>{
+    const response=await fetch(buildUrl(base,v1),{mode:'cors',credentials:'omit',cache:'no-store',signal:controller.signal});
+    if(!response.ok)throw new Error('Réponse catalogue '+response.status);
     const payload=await response.json();
+    if(!payload||typeof payload!=='object')throw new Error('Réponse catalogue invalide');
+    return payload;
+  };
+  try{
+    let payload, incoming=[], firstError=null;
+    try{
+      payload=await requestFeed(API);
+      incoming=cleanProviderResult(payload).filter(v=>validProviderPlayer(videoId(v)));
+    }catch(error){firstError=error;}
+    // Do not announce a working catalogue if every returned video has been discarded.
+    if(!incoming.length&&!controller.signal.aborted){
+      try{
+        const backup=await requestFeed(BACKUP_API,true);
+        const backupItems=cleanProviderResult(backup).filter(v=>validProviderPlayer(videoId(v)));
+        if(backupItems.length||!payload){payload=backup;incoming=backupItems;}
+      }catch(error){if(!payload)throw firstError||error;}
+    }
     if(token!==state.request)return;
-    const incoming=cleanProviderResult(payload).filter(v=>v.thumbnail&&validProviderPlayer(videoId(v)));
     const known=new Set(state.items.map(x=>x.key));
     for(const v of incoming)if(!known.has(v.key)){state.items.push(v);known.add(v.key);}
-    state.total=Number.isSafeInteger(payload.count)?payload.count:state.items.length;
-    state.hasNext=!!payload.next && incoming.length>0;
-    $('feed-badge').textContent='● CATALOGUE CONNECTÉ';
-    renderVideos();
-    if(state.items.length){$('catalog-state').hidden=true;if(!state.feature)featureVideo(state.items[0]);}
-    else status('Aucune vidéo trouvée','Essaie une autre recherche ou catégorie.');
-  } catch(e){
+    state.total=Number.isSafeInteger(payload?.count)?payload.count:state.items.length;
+    state.hasNext=!!payload?.next&&incoming.length>0;
+    if(state.items.length){
+      $('feed-badge').textContent='● VIDÉOS DISPONIBLES';
+      renderVideos();
+      $('catalog-state').hidden=true;
+      if(!state.feature)featureVideo(state.items.find(v=>v.thumbnail));
+    }else{
+      $('feed-badge').textContent='○ CATALOGUE SANS RÉSULTATS';
+      renderVideos();
+      const advertised=state.total>0;
+      status(advertised?'Catalogue indisponible':'Aucune vidéo trouvée',
+        advertised?'Le fournisseur annonce des vidéos mais ne renvoie aucune fiche compatible. Réessayer ou signaler le problème.':'Aucun résultat pour cette recherche. Essaie une autre catégorie.',advertised);
+    }
+  }catch(error){
     if(token!==state.request)return;
     $('feed-badge').textContent='○ CATALOGUE INDISPONIBLE';
-    if(state.items.length) {renderVideos();}
-    else status('Impossible de charger les vidéos','Le service partenaire ne répond pas ou le navigateur bloque la connexion. Aucun faux aperçu n’est affiché.',true);
-  }finally{clearTimeout(timeout);if(token===state.request){state.loading=false;activeFeedController=null;$('load-more').disabled=false;}}
+    if(state.items.length)renderVideos();
+    else status('Impossible de charger les vidéos','Le service partenaire ne répond pas ou le navigateur bloque la connexion. Réessaie plus tard.',true);
+  }finally{
+    clearTimeout(timeout);
+    if(token===state.request){state.loading=false;activeFeedController=null;$('load-more').disabled=false;}
+  }
 }
 let searchTimer;
 $('search').addEventListener('input', e=>{
