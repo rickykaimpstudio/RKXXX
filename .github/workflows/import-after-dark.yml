@@ -1,0 +1,42 @@
+name: Importer le site After Dark depuis Netlify
+on:
+  push:
+    paths:
+      - ".github/workflows/import-after-dark.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recuperer les fichiers publics du site existant
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f app.mjs ]]; then
+            echo "Source deja presente, aucun ecrasement."
+            exit 0
+          fi
+          site="https://adult-content-site-db4416.netlify.app"
+          for file in index.html styles.css app.mjs adult-provider.mjs affiliate-utils.mjs embed-utils.mjs moderation-policy.mjs partner-embeds.mjs confidentialite.html regles-et-moderation.html catalog.json owner-placements.json promos.json _headers; do
+            echo "Import : $file"
+            curl -fLsS --retry 3 --connect-timeout 20 --max-time 60 "$site/$file" --output "$file"
+          done
+          grep -q "After Dark" index.html
+          grep -q "adultembed" app.mjs
+          test -s styles.css
+      - name: Versionner le site
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f app.mjs ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index.html styles.css app.mjs adult-provider.mjs affiliate-utils.mjs embed-utils.mjs moderation-policy.mjs partner-embeds.mjs confidentialite.html regles-et-moderation.html catalog.json owner-placements.json promos.json _headers
+            if ! git diff --cached --quiet; then
+              git commit -m "Importer les fichiers actuels d'After Dark depuis Netlify"
+              git push
+            fi
+          fi
