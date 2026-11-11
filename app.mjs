@@ -3,7 +3,8 @@ import { cleanProviderResult, validProviderPlayer } from './adult-provider.mjs';
 
 // Public no-key API and permanent player URLs documented by the content provider.
 // Nothing is scraped, downloaded, copied, or served as a video file by After Dark.
-const API = 'https://adultembed.com/api/database/browse/';
+const API = '/api/catalog';
+const DIRECT_API = 'https://adultembed.com/api/database/browse/';
 const BACKUP_API = 'https://adultembed.com/api/v1/search';
 const $ = (id) => document.getElementById(id);
 const gate = $('age-gate');
@@ -138,22 +139,22 @@ async function loadFeed(append=false){
   };
   try{
     let payload, incoming=[], firstError=null;
-    try{
-      payload=await requestFeed(API);
-      incoming=cleanProviderResult(payload).filter(v=>validProviderPlayer(videoId(v)));
-    }catch(error){firstError=error;}
-    // Do not announce a working catalogue if every returned video has been discarded.
-    if(!incoming.length&&!controller.signal.aborted){
+    // Prefer same-origin Netlify function (no mobile CORS dependency).
+    // Fall back to the two documented AdultEmbed APIs until a live result is obtained.
+    for(const [base,v1] of [[API,false],[DIRECT_API,false],[BACKUP_API,true]]){
+      if(controller.signal.aborted)break;
       try{
-        const backup=await requestFeed(BACKUP_API,true);
-        const backupItems=cleanProviderResult(backup).filter(v=>validProviderPlayer(videoId(v)));
-        if(backupItems.length||!payload){payload=backup;incoming=backupItems;}
-      }catch(error){if(!payload)throw firstError||error;}
+        const candidate=await requestFeed(base,v1);
+        const items=cleanProviderResult(candidate).filter(v=>validProviderPlayer(videoId(v)));
+        if(items.length){payload=candidate;incoming=items;break;}
+        if(!payload)payload=candidate;
+      }catch(error){firstError ||= error;}
     }
+    if(!payload)throw firstError || new Error('Catalogue indisponible');
     if(token!==state.request)return;
     const known=new Set(state.items.map(x=>x.key));
     for(const v of incoming)if(!known.has(v.key)){state.items.push(v);known.add(v.key);}
-    state.total=Number.isSafeInteger(payload?.count)?payload.count:state.items.length;
+    state.total=Number.isSafeInteger(Number(payload?.count))?Number(payload.count):state.items.length;
     state.hasNext=!!payload?.next&&incoming.length>0;
     if(state.items.length){
       $('feed-badge').textContent='● VIDÉOS DISPONIBLES';
