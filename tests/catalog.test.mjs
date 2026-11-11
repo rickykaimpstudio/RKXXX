@@ -48,3 +48,15 @@ test('le service essaie v1 si browse est indisponible',async () => {
     assert.equal(n,2);
   } finally {globalThis.fetch=previous;}
 });
+
+test('les domaines CDN réellement retournés affichent leurs miniatures', () => {
+  for(const url of [
+    'https://imgds.net/snaps/abcdef12.jpg',
+    'https://pornalizer.app/media/thumbnails/test.jpg',
+    'https://adultembed.com/media/thumbnails/webp/sample.webp'
+  ]){
+    const rows=cleanProviderResult({results:[{...video,thumbnail:url}]});
+    assert.equal(rows[0].thumbnail,url);
+  }
+  assert.equal(cleanProviderResult({results:[{...video,thumbnail:'https://example.org/img.jpg'}]})[0].thumbnail,null);
+});
