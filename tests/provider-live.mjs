@@ -2,7 +2,7 @@
 // Logs only technical metadata and never writes or downloads media files.
 const endpoint='https://adultembed.com/api/database/browse/?orientation=all&page=1&page_size=2';
 const response=await fetch(endpoint, {
-  headers:{Accept:'application/json','X-Site-URL':'https://adult-content-site-db4416.netlify.app'},
+  headers:{Accept:'application/json', Origin:'https://adult-content-site-db4416.netlify.app', 'X-Site-URL':'https://adult-content-site-db4416.netlify.app'},
   signal:AbortSignal.timeout(15000)
 });
 console.log('Provider status:',response.status);
