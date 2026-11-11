@@ -1,7 +1,7 @@
 import {cleanProviderResult} from '../adult-provider.mjs';
 // Read-only integration smoke test against the provider's official public API.
 // Logs only technical metadata and never writes or downloads media files.
-const endpoint='https://adultembed.com/api/database/browse/?orientation=all&page=1&page_size=2';
+const endpoint='https://adultembed.com/api/database/browse/?orientation=all&page=1&page_size=40';
 const response=await fetch(endpoint, {
   headers:{Accept:'application/json', Origin:'https://adult-content-site-db4416.netlify.app', 'X-Site-URL':'https://adult-content-site-db4416.netlify.app'},
   signal:AbortSignal.timeout(15000)
@@ -28,3 +28,6 @@ for(const v of data.results.slice(0,2)){
 
 if(!normalized.length)throw new Error('Normalization rejected real provider cards');
 console.log('Catalogue public partenaire: métadonnées disponibles.');
+
+console.log('Thumbnail URL protocols:', [...new Set(data.results.map(r=>{try{return new URL(r.thumbnail).protocol}catch{return 'invalide'}}))].join(','));
+console.log('Thumbnail hosts:',[...new Set(data.results.map(r=>{try{return new URL(r.thumbnail).hostname}catch{return 'invalide'}}))].join(','));
