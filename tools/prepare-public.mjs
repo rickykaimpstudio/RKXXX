@@ -1,7 +1,7 @@
 // Keep Netlify Functions source, CI, and admin files OUT of public assets.
 import {mkdir,copyFile,rm} from 'node:fs/promises';
 const files = [
-  'index.html','styles.css','app.mjs','adult-provider.mjs',
+  'index.html','styles.css','app.mjs','premium-tools.mjs','adult-provider.mjs',
   'affiliate-utils.mjs','embed-utils.mjs','moderation-policy.mjs',
   'partner-embeds.mjs','confidentialite.html','regles-et-moderation.html',
   'catalog.json','owner-placements.json','promos.json','_headers'
