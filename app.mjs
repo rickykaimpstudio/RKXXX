@@ -1,4 +1,5 @@
 import { normalizePlacements } from './affiliate-utils.mjs';
+import { mountPremiumMarketplace } from './premium-tools.mjs';
 import { cleanProviderResult, validProviderPlayer } from './adult-provider.mjs';
 
 // Public no-key API and permanent player URLs documented by the content provider.
@@ -243,6 +244,7 @@ if('IntersectionObserver' in window) {
   autoLoad.observe($('load-more'));
 }
 setCategories();renderVideos();
+mountPremiumMarketplace();
 // Restricted material is not fetched or displayed before the declaration.
 gate.hidden = state.ageConfirmed;
 app.inert = !state.ageConfirmed;
