@@ -20,7 +20,7 @@ jobs:
             exit 0
           fi
           site="https://adult-content-site-db4416.netlify.app"
-          for file in index.html styles.css app.mjs adult-provider.mjs affiliate-utils.mjs embed-utils.mjs moderation-policy.mjs partner-embeds.mjs confidentialite.html regles-et-moderation.html catalog.json owner-placements.json promos.json _headers; do
+          for file in index.html styles.css app.mjs adult-provider.mjs affiliate-utils.mjs embed-utils.mjs moderation-policy.mjs partner-embeds.mjs confidentialite.html regles-et-moderation.html catalog.json owner-placements.json promos.json; do
             echo "Import : $file"
             curl -fLsS --retry 3 --connect-timeout 20 --max-time 60 "$site/$file" --output "$file"
           done
@@ -34,7 +34,7 @@ jobs:
           if [[ -f app.mjs ]]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add index.html styles.css app.mjs adult-provider.mjs affiliate-utils.mjs embed-utils.mjs moderation-policy.mjs partner-embeds.mjs confidentialite.html regles-et-moderation.html catalog.json owner-placements.json promos.json _headers
+            git add index.html styles.css app.mjs adult-provider.mjs affiliate-utils.mjs embed-utils.mjs moderation-policy.mjs partner-embeds.mjs confidentialite.html regles-et-moderation.html catalog.json owner-placements.json promos.json
             if ! git diff --cached --quiet; then
               git commit -m "Importer les fichiers actuels d'After Dark depuis Netlify"
               git push
