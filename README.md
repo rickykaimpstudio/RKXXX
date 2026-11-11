@@ -1,11 +1,19 @@
-# AFTER DARK · Déploiement propre
+# After Dark · Ricky Kaimp Studio
 
-[![Déployer After Dark sur Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/rickykaimpstudio/RKXXX)
+Site 18+ distinct du site principal Ricky Kaimp Studio.
 
-**Un clic pour créer un nouveau site Netlify depuis les fichiers GitHub.** Cette méthode est distincte de l'ancien site créé par glisser-déposer, et ne modifie pas Ricky Kaimp Studio ni son dépôt principal.
+**Dépôt GitHub officiel :** https://github.com/rickykaimpstudio/RKXXX
 
-La configuration `netlify.toml` construit le dossier `dist` et publie une fonction serveur `/api/catalog`. Si le fournisseur est inaccessible, le navigateur lit `catalog.json`, une sélection de fiches officielles conservées en secours.
+**Projet Netlify cible :** https://app.netlify.com/projects/elaborate-frangipane-0a4ebe
 
-**Important :** le bouton crée un **nouveau site Netlify**, il ne remplace pas automatiquement le domaine existant. Le fournisseur vidéo conserve l'hébergement et le contrôle de la lecture. Les vidéos ne sont pas copiées sur le serveur.
+**Site public :** https://elaborate-frangipane-0a4ebe.netlify.app
 
-Dépôt du site : https://github.com/rickykaimpstudio/RKXXX
+## Publication
+
+La branche `main` contient le code de production. Une fois le dépôt relié dans la configuration de **ce projet Netlify existant**, chaque nouveau commit Git peut déclencher un déploiement automatique. Ne pas créer un autre site via « Deploy to Netlify ».
+
+Netlify exécute `node tools/prepare-public.mjs`, publie le dossier `dist`, et déploie `netlify/functions/catalog.mjs` pour l'API `/api/catalog`. Un catalogue de miniatures de secours est inclus dans `catalog.json`.
+
+Le contenu des vidéos est hébergé et diffusé par ses fournisseurs autorisés, et ne doit pas être réhébergé sans licence. La déclaration 18+ ne remplace pas une vérification d'âge réglementaire quand elle est nécessaire.
+
+**Ce dépôt ne contient pas le code du site Lovable principal.**
