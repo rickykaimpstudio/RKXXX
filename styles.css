@@ -228,3 +228,82 @@ body.age-locked .app {visibility:hidden}
 .age-form .gate-actions {display:flex;flex-direction:column!important;gap:8px!important;margin:10px 0!important}
 .age-form .gate-actions .button {width:100%;min-height:43px!important;font-size:11px}
 @media (min-width:580px) {.age-form .gate-actions {flex-direction:row!important}}
+
+/* AFTER DARK — RK credits marketplace. Visual-only commerce, fail-closed backend. */
+.credits-hub{position:relative;margin:35px max(3vw,14px) 10px;padding:clamp(26px,3.8vw,46px)!important;overflow:hidden;
+  border-radius:20px;border:1px solid #652b56;background:radial-gradient(ellipse at 95% 0,#82285177,transparent 43%),linear-gradient(125deg,#201322,#0f0d18 70%)}
+.credits-hub .section-top h2,.premium-experiences .section-top h2{font-size:clamp(31px,4.5vw,55px)}
+.credits-hub .section-copy,.premium-experiences .section-copy{display:block!important;color:#d7c7d3;font-size:13px;max-width:650px}
+.credits-security{color:#ffe0ef;border-color:#c34b8b;font-size:10px;letter-spacing:.5px}
+.credit-command{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);border:1px solid #82435f;border-radius:18px;overflow:hidden;min-height:215px;background:linear-gradient(115deg,#4e183d,#1a1020)}
+.credit-command-main{padding:clamp(21px,3.8vw,36px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.credit-command-kicker{font-size:10px;letter-spacing:2.5px;font-weight:900;color:#ffaccf}
+.credit-command-main .credit-number{font:800 clamp(44px,7vw,78px)/1 'Space Grotesk',sans-serif;letter-spacing:-.07em;margin:12px 0;color:#fff}
+.credit-command-main p{font-size:12px;color:#f1d8e7;line-height:1.7;max-width:450px;margin:0}
+.credit-command-aside{padding:20px 28px;display:flex;flex-direction:column;justify-content:center;gap:16px;background:#100e19bb}
+.credit-security-row{display:flex;align-items:flex-start;gap:14px;font-size:12px;color:#eedde8;line-height:1.5}
+.credit-security-row b{display:grid;place-items:center;min-width:32px;min-height:32px;border-radius:9px;background:#7e2e63;border:1px solid #e368a6;color:#fff;font-size:11px}
+.credit-plans-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:34px 0 15px}
+.credit-plans-head h3{font:800 20px 'Space Grotesk';margin:0;letter-spacing:-.5px}
+.credit-plans-head span{font-size:10px;color:#d7a7c1}
+.credit-plan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.credit-plan{position:relative;min-height:200px;display:flex;flex-direction:column;align-items:flex-start;padding:21px;border:1px solid #68435d;border-radius:14px;background:linear-gradient(135deg,#311c31,#181320)}
+.credit-plan-popular{border-color:#ee4c9b;box-shadow:0 0 35px #dc328026}
+.credit-plan-type{font-size:9px;color:#f7a0c6;font-weight:900;letter-spacing:1.4px}
+.credit-plan-featured{position:absolute;top:17px;right:14px;font-size:9px;font-weight:900;background:#f02678;color:white;border-radius:20px;padding:5px 9px}
+.credit-plan h4{font:800 24px 'Space Grotesk';margin:17px 0 7px}
+.credit-plan p{font-size:12px;color:#d7c4d2;line-height:1.65;margin:0 0 18px;flex:1}
+.credit-plan button{width:100%;padding:12px 14px;border:1px solid #a45280;border-radius:10px;background:#43203d;color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:space-between}
+.credit-plan button:hover{background:#70285a}
+.credit-disclaimer{font-size:11px;line-height:1.7;color:#c3adc0;margin:17px 0 0}
+.premium-experiences{padding-top:54px}
+.premium-experiences .section-top{align-items:end}
+.premium-credit-link{display:inline-flex;align-items:center;gap:9px;font-weight:900;font-size:10px;letter-spacing:.5px;padding:12px 14px;border:1px solid #754763;border-radius:10px;background:#231424;color:#ffd0e4}
+.premium-tools-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.premium-tool-card{display:flex;flex-direction:column;min-height:260px;padding:20px 21px;border:1px solid #58394f;border-radius:16px;
+  background:radial-gradient(circle at 100% 0,#702b5833,transparent 60%),linear-gradient(125deg,#211724,#15111d);transition:border-color .2s,transform .2s}
+.premium-tool-card:hover{transform:translateY(-3px);border-color:#e063a2}
+.premium-tool-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.premium-tool-symbol{font-size:29px;color:#ff8abc;line-height:1}
+.premium-tool-lock{font-size:9px;font-weight:900;color:#fbc2dc;letter-spacing:.3px;border:1px solid #9d4c78;border-radius:20px;padding:7px 9px}
+.premium-tool-category{font-size:10px;text-transform:uppercase;color:#bc8eaa;letter-spacing:1.4px;margin:17px 0 6px}
+.premium-tool-card h3{font:800 22px 'Space Grotesk';margin:0 0 9px;letter-spacing:-.7px}
+.premium-tool-description{font-size:12px;color:#c9b4c8;line-height:1.65;margin:0 0 16px;flex:1}
+.premium-tool-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.premium-tool-footer small{font-size:10px;color:#fbb3d2}
+.premium-tool-button{border-radius:9px;border:1px solid #86476e;background:#40243b;color:white;padding:10px 13px;font-size:11px;font-weight:800}
+.premium-tool-button:hover{background:#653155}
+.premium-dialog{position:fixed;max-width:min(96vw,520px);width:100%;border:1px solid #a84c86;border-radius:19px;background:#180e1e;color:#fff;padding:0;box-shadow:0 25px 80px #000d}
+.premium-dialog::backdrop{background:#030208d9;backdrop-filter:blur(5px)}
+.premium-dialog-body{padding:24px}
+.premium-dialog-top{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#ffabd0;letter-spacing:1px;font-weight:900}
+.premium-dialog-top button{background:#3a2235;color:#fff;border:1px solid #76465c;border-radius:8px;width:36px;height:36px}
+.premium-dialog-icon{font-size:55px;color:#ff5eaa;margin:23px 0 7px}
+.premium-dialog h2{font:800 30px 'Space Grotesk';margin:0 0 8px}
+.premium-dialog p{font-size:13px;line-height:1.8;color:#e0c8da}
+.premium-dialog .button{width:100%;margin:11px 0}
+.premium-dialog small{color:#c3aabb;font-size:10px;line-height:1.6}
+@media(max-width:850px){.premium-tools-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){
+ .credits-hub{margin:22px 9px 6px;padding:20px 13px!important;border-radius:13px}
+ .credits-hub .section-top h2,.premium-experiences .section-top h2{font-size:31px}
+ .credits-hub .section-copy,.premium-experiences .section-copy{font-size:12px}
+ .credits-security{font-size:9px}
+ .credit-command{grid-template-columns:1fr}
+ .credit-command-main{padding:21px}
+ .credit-command-aside{padding:18px 20px}
+ .credit-security-row{font-size:11px}
+ .credit-plan-grid{grid-template-columns:1fr;gap:9px}
+ .credit-plan{min-height:155px;padding:17px}
+ .credit-plan h4{font-size:23px;margin:10px 0 4px}
+ .credit-plan p{margin:0 0 12px}
+ .premium-experiences{padding:43px 10px 12px}
+ .premium-tools-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .premium-tool-card{min-height:238px;padding:13px 12px}
+ .premium-tool-card h3{font-size:17px}
+ .premium-tool-description{font-size:11px}
+ .premium-tool-lock{font-size:8px;padding:5px}
+ .premium-tool-footer{align-items:stretch;flex-direction:column}
+ .premium-tool-button{width:100%}
+}
+@media(max-width:370px){.premium-tools-grid{grid-template-columns:1fr}}
