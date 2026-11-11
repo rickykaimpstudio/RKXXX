@@ -130,3 +130,23 @@ main {max-width:1420px;margin:0 auto}.button {display:inline-flex;align-items:ce
 .ph-notice a{text-decoration:underline;color:#ff9fc6}
 @media(max-width:700px){.featured-poster{width:100%;opacity:.27}.hero::after{background:linear-gradient(90deg,#160a1be6,#160a1b66)}.hero{min-height:430px}.hero h1{font-size:clamp(70px,18vw,98px)}.video-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.video-meta{padding:9px}.video-meta h3{font-size:11px;min-height:36px}.viewer{padding:7px}.viewer-inner{padding:8px}.viewer-frame{aspect-ratio:16/9}.feed-summary{font-size:10px}}
 @media(max-width:385px){.video-grid{grid-template-columns:1fr}}
+
+/* Mobile first: keep branding, show the actual catalogue within the first screen. */
+@media (max-width:700px) {
+  .hero {min-height:225px;margin-top:8px;border-radius:18px;}
+  .hero-content {padding:18px 22px 22px;}
+  .hero h1 {font-size:clamp(54px,14vw,72px);margin:20px 0 16px;line-height:.79;}
+  .hero-lead {font-size:17px;margin:16px 0 4px;}
+  .hero-copy,.hero .micro-note,.stats-strip,.hero-shape {display:none;}
+  .hero-actions {margin-top:10px;}
+  .hero-actions .button {min-height:41px;padding:0 16px;}
+  .section.videos-section {padding-top:19px;}
+  .videos-section .section-top {margin-bottom:14px;gap:8px;}
+  .videos-section .section-top h2 {font-size:28px;margin:7px 0;}
+  .videos-section .section-copy {display:none;}
+  .videos-section .pill {font-size:9px;padding:6px 10px;}
+  .videos-section .controls {gap:7px;}
+  .videos-section .categories {padding:12px 0;}
+  .video-grid {gap:8px;}
+  .video-cover img {object-fit:cover;}
+}
