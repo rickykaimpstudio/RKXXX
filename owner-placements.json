@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "description": "Only owner-approved sponsor campaigns, none configured. URLs must be HTTPS and on approved affiliate hosts.",
+  "campaigns": [],
+  "partnerOffers": [],
+  "liveEmbeds": []
+}
