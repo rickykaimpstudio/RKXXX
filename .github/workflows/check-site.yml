@@ -24,6 +24,7 @@ jobs:
           set -euo pipefail
           while IFS= read -r -d '' file; do node --check "$file"; done < <(find . -type f -name '*.mjs' -not -path './dist/*' -print0)
           node --test tests/*.test.mjs
+          node tests/provider-live.mjs
           node tools/prepare-public.mjs
           test -s dist/index.html
           test -s dist/app.mjs
