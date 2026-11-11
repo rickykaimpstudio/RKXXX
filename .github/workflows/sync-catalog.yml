@@ -1,0 +1,32 @@
+name: Actualiser le catalogue After Dark de secours
+on:
+  push:
+    paths:
+      - ".github/workflows/sync-catalog.yml"
+      - "tools/sync-catalog.mjs"
+  workflow_dispatch:
+  schedule:
+    - cron: '20 8 * * 1'
+permissions:
+  contents: write
+jobs:
+  catalogue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Charger les miniatures officielles
+        run: node tools/sync-catalog.mjs
+      - name: Publier la fiche de secours
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Actualiser les miniatures officielles de secours"
+            git push origin HEAD:main
+          fi
