@@ -7,6 +7,8 @@ import { cleanProviderResult, validProviderPlayer } from './adult-provider.mjs';
 const API = '/api/catalog';
 const DIRECT_API = 'https://adultembed.com/api/database/browse/';
 const BACKUP_API = 'https://adultembed.com/api/v1/search';
+const PAGE_SIZE = 24;
+const MAX_CATALOG_PAGES = 1000;
 const $ = (id) => document.getElementById(id);
 const gate = $('age-gate');
 const app = $('app');
@@ -56,6 +58,50 @@ function toggleFav(id) {
   try { localStorage.setItem('rk-afterdark-favorites-v2',JSON.stringify(favorites)); } catch { /* optional */ }
   renderVideos();
 }
+function knownPageLimit() {
+  // A displayed page must come from actual partner results; totals are only provider estimates.
+  if (!state.hasNext) return state.page;
+  const advertised = Math.ceil(state.total / PAGE_SIZE);
+  return Math.min(MAX_CATALOG_PAGES, Math.max(state.page + 1, advertised));
+}
+function renderPager() {
+  const nav = $('page-navigation');
+  if (!nav) return;
+  const limit = knownPageLimit();
+  nav.hidden = state.favOnly || (limit <= 1 && state.page === 1);
+  $('page-prev').disabled = state.loading || state.page <= 1;
+  $('page-next').disabled = state.loading || !state.hasNext || state.page >= MAX_CATALOG_PAGES;
+  const numbers = $('page-numbers');
+  numbers.replaceChildren();
+  if (nav.hidden) return;
+  const pages = new Set([1, state.page - 2, state.page - 1, state.page, state.page + 1, state.page + 2, limit]);
+  const visible = [...pages].filter(p => p >= 1 && p <= limit).sort((a,b) => a - b);
+  for (const [i,number] of visible.entries()) {
+    if (i && number - visible[i-1] > 1) numbers.append(element('span','page-ellipsis','…'));
+    const button = element('button','page-number',String(number));
+    button.type = 'button';
+    if (number === state.page) button.setAttribute('aria-current','page');
+    button.disabled = state.loading || number === state.page;
+    button.addEventListener('click',() => goToPage(number));
+    numbers.append(button);
+  }
+  const jump = $('page-jump');
+  jump.max = String(limit);
+  jump.placeholder = String(state.page);
+  $('page-indicator').textContent = limit > state.page + 1 ?
+    `Page ${state.page} · jusqu'à ${limit.toLocaleString('fr-CA')} pages selon le fournisseur (disponibilité non garantie)` :
+    `Page ${state.page}${state.hasNext ? ' · autres vidéos disponibles' : ' · dernière page disponible'}`;
+}
+async function goToPage(value) {
+  const next = Number(value);
+  if (state.loading || !Number.isSafeInteger(next) || next < 1 || next > knownPageLimit() || next > MAX_CATALOG_PAGES || next === state.page) return;
+  await loadFeed(false,next);
+  const url = new URL(location.href);
+  if (next === 1) url.searchParams.delete('page');
+  else url.searchParams.set('page',String(next));
+  history.replaceState(null,'',url);
+  $('videos').scrollIntoView({behavior:'smooth',block:'start'});
+}
 function renderVideos() {
   const root = $('video-grid'); root.replaceChildren();
   $('favorites-only').setAttribute('aria-pressed',String(state.favOnly));
@@ -76,8 +122,9 @@ function renderVideos() {
   root.hidden = !shown.length;
   if (state.items.length && !shown.length) status('Aucun favori dans cette sélection','Appuie sur ♡ sous les vidéos pour les conserver ici.');
   else if(state.items.length) $('catalog-state').hidden=true;
-  $('feed-count').textContent=state.total?`${state.total.toLocaleString('fr-CA')} vidéos annoncées par le partenaire · ${state.items.length} chargées`:`${state.items.length} vidéos chargées`;
-  $('load-more').hidden=!state.hasNext || state.favOnly || !state.active;
+  $('feed-count').textContent=state.total?`${state.total.toLocaleString('fr-CA')} vidéos annoncées par le partenaire · ${state.items.length} sur la page ${state.page}`:`${state.items.length} vidéos sur la page ${state.page}`;
+  $('load-more').hidden=true;
+  renderPager();
 }
 function featureVideo(v){
   if(!v || !v.thumbnail)return;
@@ -121,13 +168,13 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.current)close
 $('featured-play').addEventListener('click',()=>{if(state.feature)openVideo(state.feature);});
 
 let activeFeedController = null;
-async function loadFeed(append=false){
+async function loadFeed(append=false,requestedPage=1){
   if (!state.active) return;
   if (state.loading && append) return;
   if (state.loading) activeFeedController?.abort();
   state.loading=true;
   const token=++state.request;
-  if(!append){state.page=1;state.total=0;state.hasNext=false;state.items=[];renderVideos();}
+  if(!append){state.page=Math.max(1,Math.min(MAX_CATALOG_PAGES,requestedPage));state.total=0;state.hasNext=false;state.items=[];renderVideos();}
   $('feed-badge').textContent='◉ CHARGEMENT DES VIDÉOS';
   $('load-more').hidden=true;
   status('Chargement des vraies miniatures…','Connexion au catalogue vidéo partenaire.');
@@ -156,7 +203,7 @@ async function loadFeed(append=false){
   const buildUrl=(base,v1=false)=>{
     const u=new URL(base);
     u.searchParams.set('page',String(state.page));
-    u.searchParams.set(v1?'per_page':'page_size','24');
+    u.searchParams.set(v1?'per_page':'page_size',String(PAGE_SIZE));
     u.searchParams.set('orientation','all');
     u.searchParams.set('sort',state.sort);
     if(v1)u.searchParams.set('quality','complete');
@@ -202,7 +249,7 @@ async function loadFeed(append=false){
     const known=new Set(state.items.map(x=>x.key));
     for(const v of incoming)if(!known.has(v.key)){state.items.push(v);known.add(v.key);}
     state.total=Number.isSafeInteger(Number(payload?.count))?Number(payload.count):state.items.length;
-    state.hasNext=!!payload?.next&&incoming.length>0;
+    state.hasNext=!!payload?.next&&incoming.length>0&&state.page<MAX_CATALOG_PAGES;
     if(state.items.length){
       $('feed-badge').textContent=payload?.__snapshot ? '● VIDÉOS DE SECOURS' : '● VIDÉOS DISPONIBLES';
       renderVideos();
@@ -222,7 +269,7 @@ async function loadFeed(append=false){
     else status('Impossible de charger les vidéos','Le service partenaire ne répond pas ou le navigateur bloque la connexion. Réessaie plus tard.',true);
   }finally{
     clearTimeout(timeout);
-    if(token===state.request){state.loading=false;activeFeedController=null;$('load-more').disabled=false;}
+    if(token===state.request){state.loading=false;activeFeedController=null;$('load-more').disabled=false;renderPager();}
   }
 }
 let searchTimer;
@@ -231,18 +278,16 @@ $('search').addEventListener('input', e=>{
   clearTimeout(searchTimer);
   searchTimer=setTimeout(()=>loadFeed(false),500);
 });
-$('sort').addEventListener('change', e=>{state.sort=['newest','popular','longest'].includes(e.target.value)?e.target.value:'newest';loadFeed(false);});
+$('sort').addEventListener('change', e=>{state.sort=['newest','popular','longest','views','likes'].includes(e.target.value)?e.target.value:'newest';loadFeed(false);});
 $('favorites-only').addEventListener('click',()=>{state.favOnly=!state.favOnly;renderVideos();});
 $('retry-feed').addEventListener('click',()=>loadFeed(false));
-$('load-more').addEventListener('click',()=>{if(state.loading||!state.hasNext)return;state.page+=1;loadFeed(true);});
-if('IntersectionObserver' in window) {
-  const autoLoad = new IntersectionObserver((entries)=>{
-    if(entries.some(entry=>entry.isIntersecting) && state.hasNext && !state.loading && state.ageConfirmed && !state.favOnly){
-      $('load-more').click();
-    }
-  },{rootMargin:'700px'});
-  autoLoad.observe($('load-more'));
-}
+$('load-more').addEventListener('click',()=>goToPage(state.page + 1));
+$('page-prev').addEventListener('click',()=>goToPage(state.page - 1));
+$('page-next').addEventListener('click',()=>goToPage(state.page + 1));
+$('page-jump-form').addEventListener('submit',e=>{
+  e.preventDefault();
+  goToPage(Number($('page-jump').value));
+});
 setCategories();renderVideos();
 mountPremiumMarketplace();
 // Restricted material is not fetched or displayed before the declaration.
