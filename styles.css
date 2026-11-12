@@ -419,3 +419,37 @@ body{background:#0b0a13}
   .topbar .topnav a{font-size:9px}
   .age-card{padding:22px 14px!important}
 }
+
+/* X-NIGHT QC — ajustements ciblés de l'en-tête, sans toucher au flux vidéo. */
+.topbar {
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+.topbar::before,
+.topbar::after { display: none !important; }
+.topbar .brand {
+  grid-area: brand;
+  justify-self: center;
+  align-self: center;
+  transform: translateY(7px);
+  margin-inline: auto;
+  text-align: center;
+}
+.topbar .topnav a {
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.055);
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.topbar .topnav a:focus-visible,
+.topbar .topnav a:hover {
+  background: rgba(255,119,185,.14);
+  border-color: rgba(255,119,185,.35);
+}
+#search, #categories, #favorites-only { scroll-margin-top: 110px; }
+@media (max-width:700px) {
+  .topbar .brand { transform: translateY(6px); }
+  .topbar .topnav { scrollbar-width: none; }
+  .topbar .topnav a { font-size: 10px; }
+}
