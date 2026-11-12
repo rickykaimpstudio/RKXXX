@@ -20,7 +20,8 @@ const result = (body, status=200, cache=false) => Response.json(body, {
 export default async function catalog(request) {
   if(request.method !== 'GET') return result({error:'Méthode non autorisée'},405);
   const query = new URL(request.url).searchParams;
-  const page = number(query.get('page'), 1, 100);
+  // Deep paging remains bounded; actual results must be supplied by the partner.
+  const page = number(query.get('page'), 1, 1000);
   const pageSize = number(query.get('page_size') || query.get('per_page'), 24, 40);
   const sort = allowedSort.has(query.get('sort')) ? query.get('sort') : 'newest';
   const orientation = allowedOrientation.has(query.get('orientation')) ? query.get('orientation') : 'all';
