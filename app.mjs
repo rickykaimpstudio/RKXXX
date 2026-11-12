@@ -25,7 +25,7 @@ try {
   ageConfirmed = Number.isFinite(stamp) && stamp > 0 &&
     stamp <= Date.now() && Date.now() - stamp < AGE_DECLARATION_TTL_MS;
 } catch { /* browsing in private mode */ }
-const state = { items: [], category: 'all', sort: 'newest', search: '', page: 1, total: 0, hasNext: false, loading: false, request: 0, active: true, ageConfirmed, favOnly: false, current: null, feature: null };
+const state = { items: [], category: 'all', orientation: 'all', sort: 'newest', search: '', page: 1, total: 0, hasNext: false, loading: false, request: 0, active: true, ageConfirmed, favOnly: false, current: null, feature: null };
 const isFav = (id) => favorites.includes(id);
 function element(tag, className = '', text = '') {
   const node = document.createElement(tag);
@@ -184,7 +184,7 @@ async function loadFeed(append=false,requestedPage=1){
   // Show a real, locally deployed backup feed within the first paint of the catalogue.
   // The live provider request still runs and replaces it when fresh results arrive.
   let shownSnapshot=false;
-  if(!append && !state.search.trim() && state.category==='all' && state.sort==='newest'){
+  if(!append && state.page===1 && !state.search.trim() && state.category==='all' && state.orientation==='all' && state.sort==='newest'){
     try{
       const backupResponse=await fetch('/catalog.json',{cache:'force-cache',signal:controller.signal});
       if(backupResponse.ok){
@@ -204,7 +204,7 @@ async function loadFeed(append=false,requestedPage=1){
     const u=new URL(base);
     u.searchParams.set('page',String(state.page));
     u.searchParams.set(v1?'per_page':'page_size',String(PAGE_SIZE));
-    u.searchParams.set('orientation','all');
+    u.searchParams.set('orientation',state.orientation);
     u.searchParams.set('sort',state.sort);
     if(v1)u.searchParams.set('quality','complete');
     if(state.category!=='all')u.searchParams.set('content_type',state.category);
@@ -279,6 +279,7 @@ $('search').addEventListener('input', e=>{
   searchTimer=setTimeout(()=>loadFeed(false),500);
 });
 $('sort').addEventListener('change', e=>{state.sort=['newest','popular','longest','views','likes'].includes(e.target.value)?e.target.value:'newest';loadFeed(false);});
+$('orientation').addEventListener('change', e=>{state.orientation=['all','straight','gay','bi','trans'].includes(e.target.value)?e.target.value:'all';loadFeed(false);});
 $('favorites-only').addEventListener('click',()=>{state.favOnly=!state.favOnly;renderVideos();});
 $('retry-feed').addEventListener('click',()=>loadFeed(false));
 $('load-more').addEventListener('click',()=>goToPage(state.page + 1));
