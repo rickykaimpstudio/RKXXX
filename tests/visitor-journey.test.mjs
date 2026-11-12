@@ -30,7 +30,7 @@ test('une vignette lance directement le vrai lecteur du fournisseur',()=>{
 
 test('les vidéos sont empilées en grand format, la lecture reste sur la page',()=>{
   assert.match(refresh,/\.video-grid\{[\s\S]*grid-template-columns:minmax\(0,1fr\)!important/);
-  assert.match(refresh,/#video-grid\[hidden\]\{display:none!important\}/);
+  assert.match(refresh,/\.video-grid\[hidden\]\{display:none!important\}/);
   assert.match(refresh,/\.hero,\.stats-strip\{display:none!important\}/);
   assert.match(html,/id="viewer-frame"/);
 });
