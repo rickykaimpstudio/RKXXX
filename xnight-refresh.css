@@ -238,3 +238,6 @@ main{max-width:1140px}
  .age-round{width:98px!important;height:98px!important;font-size:40px!important}
  .age-card #age-title{font-size:27px!important}
 }
+
+/* Un écran accepté doit réellement disparaître malgré le style du portail. */
+#age-gate[hidden]{display:none!important}
