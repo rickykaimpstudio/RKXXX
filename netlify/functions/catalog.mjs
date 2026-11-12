@@ -1,7 +1,7 @@
 // Serve the official AdultEmbed catalogue from the site's own origin.
 // Only metadata is returned; no third-party media is downloaded or rehosted.
 const BASE = 'https://adultembed.com';
-const TARGET_SITE = 'https://adult-content-site-db4416.netlify.app';
+const TARGET_SITE = 'https://x-nightqc.netlify.app';
 const allowedSort = new Set(['newest', 'popular', 'longest', 'views', 'likes']);
 const allowedOrientation = new Set(['all', 'straight', 'gay', 'bi', 'trans']);
 const allowedType = new Set(['scene', 'amateur']);
