@@ -1,28 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {runInNewContext} from 'node:vm';
 
-// Exercise the exact browser validator against a fixed date.
-const code=readFileSync('app.mjs','utf8');
-const start=code.indexOf('function ageOnCalendarDate(');
-const end=code.indexOf('const dobInput =',start);
-assert.ok(start>=0 && end>start, 'ageOnCalendarDate function is present');
-const calculate=runInNewContext(code.slice(start,end)+'\nageOnCalendarDate;');
+// X-NIGHT QC uses an adult self-declaration, not a DOB form.
+// Validate what is actually shipped without inventing a date verifier.
+const app=readFileSync('app.mjs','utf8');
+const html=readFileSync('index.html','utf8');
+const css=readFileSync('xnight-refresh.css','utf8');
 
-test('18 ans aujourd’hui passe, une journée plus jeune échoue',()=>{
-  const now=new Date(2026,10,11,12,0);
-  assert.equal(calculate('2008-11-11',now),18);
-  assert.equal(calculate('2008-11-12',now),17);
-  assert.equal(calculate('2008-11-10',now),18);
+test('l’accès nécessite une déclaration 18+ avant de charger le catalogue',()=>{
+  assert.match(html,/id="age-gate"/);
+  assert.match(html,/id="age-form"/);
+  assert.match(html,/J'AI 18 ANS OU PLUS · ENTRER/);
+  assert.match(app,/app\.inert = !state\.ageConfirmed/);
+  assert.match(app,/if \(state\.ageConfirmed\) void loadFeed\(false(?:,initialPage)?\)/);
 });
-test('dates invalides et dates futures refusées',()=>{
-  const now=new Date(2026,10,11,12,0);
-  for(const val of ['','2000-02-30','2027-01-01','2000-13-04','2000-00-01','2002-11-00','hello']){
-    assert.equal(calculate(val,now),null, val);
-  }
+
+test('la déclaration de majorité est mémorisée seulement pendant la session',()=>{
+  assert.match(app,/sessionStorage\.getItem\(AGE_CONSENT_KEY\)/);
+  assert.match(app,/sessionStorage\.setItem\(AGE_CONSENT_KEY, 'confirmed'\)/);
+  assert.match(html,/uniquement pour cette session du navigateur/);
+  assert.doesNotMatch(app,/localStorage\.setItem\(AGE_CONSENT_KEY/);
 });
-test('dates bissextiles calculées correctement',()=>{
-  assert.equal(calculate('2008-02-29',new Date(2026,1,28,12)),17);
-  assert.equal(calculate('2008-02-29',new Date(2026,2,1,12)),18);
+
+test('la validation masque réellement le portail et garde les vidéos sur le fournisseur',()=>{
+  assert.match(app,/gate\.hidden = true/);
+  assert.match(css,/#age-gate\[hidden\]\{display:none!important\}/);
+  assert.match(app,/frame\.src=url\.href/);
+  assert.doesNotMatch(html,/id="birthdate"/);
 });
