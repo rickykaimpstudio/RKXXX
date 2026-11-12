@@ -25,20 +25,21 @@
 <body>
   <div id="age-gate" class="age-backdrop" role="dialog" aria-modal="true" aria-labelledby="age-title">
     <div class="age-card">
-      <div class="age-brand" aria-label="X-NIGHT QC">X-<span>NIGHT</span> QC</div>
-      <p class="age-subbrand">AFTER DARK · ACCÈS RÉSERVÉ AUX ADULTES</p>
-      <div class="age-round" aria-hidden="true">18+</div>
-      <h1 id="age-title">Bienvenue sur<br><em>X-NIGHT QC</em></h1>
-      <p class="age-intro">Ce site présente des vidéos et des services réservés aux personnes de <strong>18 ans et plus</strong>.</p>
+      <div class="age-brand" aria-label="X-NIGHT QC"><span class="age-logo-white">X-NIGHT</span> <span class="age-logo-pink">QC</span></div>
+      <p class="age-subbrand">AFTER DARK · ACCÈS 18+</p>
+      <div class="age-separator" aria-hidden="true"></div>
+      <div class="age-round" aria-hidden="true"><span>18</span><span class="age-plus">+</span></div>
+      <h1 id="age-title">Bienvenue chez <em>X-NIGHT QC</em></h1>
+      <p class="age-intro">Cet espace est réservé exclusivement aux adultes. Confirme que tu as <strong>18 ans ou plus</strong> pour accéder aux vidéos.</p>
       <form id="age-form" class="age-form" autocomplete="off" novalidate>
-        <p class="age-choice-label">Confirme simplement que tu as 18 ans ou plus.</p>
         <p id="age-error" class="age-error" role="alert" aria-live="polite"></p>
         <div class="gate-actions">
-          <button id="enter" type="submit" class="button button-hot">OUI, J'AI 18 ANS OU PLUS — ENTRER</button>
-          <a class="button button-ghost" href="https://www.google.ca/">NON — QUITTER</a>
+          <button id="enter" type="submit" class="button button-hot">J'AI 18 ANS OU PLUS · ENTRER</button>
+          <a class="button button-ghost" href="https://www.google.ca/">JE SUIS MINEUR · QUITTER</a>
         </div>
       </form>
-      <small id="age-privacy">Aucune date de naissance demandée. Ta déclaration de majorité est mémorisée 30 jours sur cet appareil. Une vérification d’âge supplémentaire peut être nécessaire selon la loi applicable.</small>    </div>
+      <small id="age-privacy">Déclaration de majorité mémorisée uniquement pour cette session du navigateur. Une vérification supplémentaire peut être nécessaire selon la loi.</small>
+    </div>
   </div>
 
   <div id="app" class="app" inert>
