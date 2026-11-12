@@ -113,21 +113,29 @@ function renderVideos() {
       const img=element('img');
       const alternatives = [v.thumbnail,...(Array.isArray(v.thumbnailAlternatives)?v.thumbnailAlternatives:[])]
         .filter((value,i,list)=>typeof value==='string' && list.indexOf(value)===i);
-      let attempt=0;
+      let attempt=0, policyAttempt=0;
+      const referrerPolicies=['strict-origin-when-cross-origin','no-referrer'];
       img.alt='Aperçu de la vidéo';
       img.loading=index<6?'eager':'lazy';
       if(index<4)img.fetchPriority='high';
       img.decoding='async';
-      // The supplier's image CDN may change or expire individual previews.
-      // Retry only provider-advertised image URLs; never invent or rehost media.
-      img.referrerPolicy='no-referrer';
+      // CDN providers differ on hotlink referrers. Retry the same official
+      // thumbnail with a privacy-preserving policy before trying alternatives.
+      // Only original, supplier-advertised URLs are used; no media is proxied.
+      const loadThumbnail=()=>{
+        img.referrerPolicy=referrerPolicies[policyAttempt];
+        img.src=alternatives[attempt];
+      };
       img.addEventListener('error',()=>{
-        attempt+=1;
-        if(attempt<alternatives.length){img.src=alternatives[attempt];return;}
+        if(policyAttempt+1<referrerPolicies.length) {
+          policyAttempt+=1;loadThumbnail();return;
+        }
+        attempt+=1;policyAttempt=0;
+        if(attempt<alternatives.length){loadThumbnail();return;}
         img.remove();cover.classList.add('image-unavailable');
         cover.setAttribute('title','Aperçu momentanément indisponible — toucher pour regarder');
       });
-      img.src=alternatives[0];
+      loadThumbnail();
       cover.append(img);
     } else {
       cover.classList.add('image-unavailable');
@@ -151,9 +159,23 @@ function renderVideos() {
 function featureVideo(v){
   if(!v || !v.thumbnail)return;
   state.feature=v;
-  const img=$('featured-poster');img.src=v.thumbnail;img.hidden=false;
-  img.referrerPolicy='strict-origin-when-cross-origin';
-  img.addEventListener('error',()=>{img.hidden=true;}, {once:true});
+  const img=$('featured-poster');
+  const candidates=[v.thumbnail,...(v.thumbnailAlternatives||[])].filter(Boolean);
+  let index=0, policy=0;
+  const policies=['strict-origin-when-cross-origin','no-referrer'];
+  const loadPoster=()=>{
+    img.referrerPolicy=policies[policy];
+    img.src=candidates[index];
+    img.hidden=false;
+  };
+  img.onerror=()=>{
+    if(++policy<policies.length){loadPoster();return;}
+    policy=0;index+=1;
+    if(index<candidates.length){loadPoster();return;}
+    img.hidden=true;
+    img.onerror=null;
+  };
+  loadPoster();
   $('featured-play').hidden=false;
 }
 const videoId=v=>Number(v.key.replace('adultembed-',''));
