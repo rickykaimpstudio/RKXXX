@@ -72,13 +72,14 @@
         </div>
         <div class="controls">
           <label class="searchbox"><span>⌕</span><input id="search" type="search" placeholder="Rechercher dans les vidéos…" maxlength="80" autocomplete="off" aria-label="Chercher des vidéos"></label>
-          <select id="sort" aria-label="Trier les vidéos"><option value="newest">Plus récentes</option><option value="popular">Plus populaires</option><option value="longest">Les plus longues</option></select>
+          <select id="sort" aria-label="Trier les vidéos"><option value="newest">Plus récentes</option><option value="popular">Plus populaires</option><option value="views">Les plus vues</option><option value="likes">Les plus appréciées</option><option value="longest">Les plus longues</option></select>
           <button id="favorites-only" class="control-button" type="button" aria-pressed="false">♡ Favoris</button>
         </div>
         <div id="categories" class="categories" role="group" aria-label="Catégories"><button class="selected" type="button">Tout</button></div>
         <div class="feed-summary"><span id="feed-count" role="status">Chargement des vidéos…</span><span>Lecture intégrée · Sans redirection du site</span></div>
         <div id="catalog-state" class="catalog-state" role="status"><h3>Vidéos prêtes à être chargées</h3><p>Les vidéos apparaissent automatiquement.</p><button id="retry-feed" class="button button-hot" type="button" hidden>Réessayer</button></div>
         <div id="video-grid" class="video-grid" hidden></div>
+        <nav id="page-navigation" class="page-navigation" aria-label="Pages du catalogue vidéo" hidden><button id="page-prev" type="button" class="page-control">← Précédente</button><div id="page-numbers" class="page-numbers" aria-label="Numéros des pages"></div><button id="page-next" type="button" class="page-control">Suivante →</button><form id="page-jump-form" class="page-jump" aria-label="Accéder à une page"><label for="page-jump">Page</label><input id="page-jump" type="number" min="1" max="1000" inputmode="numeric" aria-label="Numéro de page"><button type="submit">Aller</button></form><span id="page-indicator" class="page-indicator" role="status"></span></nav>
         <button id="load-more" class="button button-ghost load-more" type="button" hidden>Afficher plus de vidéos ↓</button>
         <p class="ph-notice">Catalogue proposé par AdultEmbed. Les aperçus et lecteurs proviennent du réseau partenaire, pas de vidéos copiées sur notre serveur. Disponibilité, publicités du lecteur et droits dépendent du fournisseur. Utilise <a href="#securite">Signaler un contenu</a> pour demander un retrait.</p>
       </section>
