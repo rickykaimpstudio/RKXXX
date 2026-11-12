@@ -6,7 +6,7 @@ const html=readFileSync('index.html','utf8');
 const css=readFileSync('styles.css','utf8');
 
 test('le catalogue se charge juste après confirmation 18+ ou si l’âge est déjà validé',()=>{
-  assert.match(app,/if \(state\.ageConfirmed\) void loadFeed\(false\)/);
+  assert.match(app,/if \(state\.ageConfirmed\) void loadFeed\(false(?:,initialPage)?\)/);
   assert.match(app,/fetch\('\/catalog\.json'/);
   assert.match(app,/shownSnapshot && incoming\.length/);
   assert.match(app,/document\.body\.classList\.toggle\('age-locked', !state\.ageConfirmed\)/);
