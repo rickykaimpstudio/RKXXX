@@ -307,3 +307,115 @@ body.age-locked .app {visibility:hidden}
  .premium-tool-button{width:100%}
 }
 @media(max-width:370px){.premium-tools-grid{grid-template-columns:1fr}}
+
+/* X-NIGHT QC • Mise à niveau visuelle des deux maquettes approuvées.
+   Aucun changement au code des lecteurs vidéo, aux licences ou aux appels API. */
+:root {
+  --bg:#0c0b15; --card:#191521; --card2:#251927; --line:#463447;
+  --hot:#f02b85; --hot2:#ff77b9; --ink:#fff9fd; --muted:#c4b6c6;
+}
+body{background:#0b0a13}
+.age-backdrop{
+  background:
+    radial-gradient(ellipse at 22% 25%,rgba(205,38,110,.35),transparent 48%),
+    radial-gradient(ellipse at 80% 66%,rgba(122,45,143,.32),transparent 49%),
+    linear-gradient(145deg,#1b1222 0%,#0b0c16 63%,#17101e 100%);
+  padding:18px;min-height:100dvh;
+}
+.age-card{
+  width:min(100%,500px);max-height:calc(100dvh - 24px);overflow-y:auto;
+  background:linear-gradient(160deg,rgba(39,24,47,.97),rgba(16,14,27,.98));
+  border:1px solid rgba(248,110,174,.48);border-radius:23px;
+  box-shadow:0 26px 90px #000b,0 0 100px #e52a6920;
+  padding:clamp(24px,5vw,38px)!important;text-align:center;
+}
+.age-brand{
+  font:900 clamp(29px,8vw,43px)/1 'Space Grotesk',sans-serif;
+  color:#fff;letter-spacing:-1.8px;margin-top:8px
+}
+.age-brand span{color:#ff73b3}
+.age-subbrand{color:#ffc3dd;font-size:10px;font-weight:800;letter-spacing:1.9px;margin:12px 0 17px}
+.age-round{
+  width:90px;height:90px;margin:18px auto!important;
+  border:3px solid #fa62a8;color:#fff;background:#e8328122;
+  font:900 33px 'Space Grotesk',sans-serif;box-shadow:0 0 38px #fa328b4d
+}
+.age-card h1{
+  font:800 clamp(25px,6vw,34px)/1.17 'Space Grotesk',sans-serif!important;
+  letter-spacing:-.6px!important;margin:12px 0!important
+}
+.age-card h1 em{color:#ff83bd;font-style:normal}
+.age-card .age-intro{max-width:400px;margin:12px auto!important;font-size:12px!important;line-height:1.7!important}
+.age-form{max-width:400px;margin:auto;text-align:left}
+.age-form label{font-size:11px;line-height:1.5}
+.age-form input[type=date]{min-height:48px;background:#201925;border-color:#8d5c7d}
+.age-form .gate-actions{flex-direction:column!important;gap:9px!important;margin:10px 0!important}
+.age-form .gate-actions .button{font-size:11px;line-height:1.35;min-height:48px!important;text-align:center}
+.age-form .button-ghost{background:transparent;border:1px solid #886179}
+.age-card small{font-size:9px;line-height:1.55;max-width:405px;margin:12px auto 0}
+.topbar{
+  display:grid;grid-template-columns:48px minmax(0,1fr) 48px;
+  grid-template-areas:"menu brand search" "nav nav nav";
+  gap:9px 12px;height:auto;min-height:92px;
+  padding:12px max(2vw,14px) 7px;
+  border-bottom:1px solid #3b2b3d;background:rgba(11,10,19,.96);
+}
+.topbar .brand{grid-area:brand;min-width:0;justify-self:center;display:flex;flex-direction:column;gap:4px;text-align:center}
+.brand-wordmark{font:900 clamp(24px,4vw,35px)/1 'Space Grotesk',sans-serif;white-space:nowrap;letter-spacing:-1px}
+.topbar .brand b{color:#ff73b3}
+.topbar .brand small{margin:3px 0 0;color:#c7aabe;font-size:8px;letter-spacing:1.4px}
+.topbar .mobile-menu-toggle{grid-area:menu;align-self:center;justify-self:start;display:grid;place-items:center!important;border:none;background:transparent;color:#f9eaf2;font-size:25px;min-width:40px;min-height:40px}
+.header-search{grid-area:search;justify-self:end;align-self:center;display:grid;place-items:center;width:40px;height:40px;font-size:30px;color:#fff}
+.topbar .topnav{
+  grid-area:nav;display:flex!important;gap:4px;align-items:center;justify-content:center;
+  flex-wrap:nowrap;overflow-x:auto;max-width:100%;width:100%;scrollbar-width:none;
+  font-size:10px;font-weight:800;padding:2px 0 3px;
+}
+.topbar .topnav::-webkit-scrollbar{display:none}
+.topbar .topnav a{white-space:nowrap;border-radius:8px;padding:7px 10px;color:#e6d9e6;background:#211925}
+.topbar .topnav a:first-child{color:#fff;background:#813356}
+.mobile-menu{top:0;background:#190f23}
+.topbar .private-badge{display:none}
+.categories{gap:7px;padding:12px 0 16px}
+.categories button{font-size:10px;padding:9px 12px;border-radius:20px}
+.categories button.selected{background:#dd367f}
+.video-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.video-card{border-radius:13px;background:#18131f;border-color:#493047;box-shadow:0 7px 23px #0004}
+.video-cover{aspect-ratio:16/9;border:0;border-radius:0}
+.video-meta{padding:12px 13px}
+.video-meta h3{font-size:12px;margin:0 0 5px;min-height:0;line-height:1.5}
+.video-play{background:#f02b85;width:46px;height:46px}
+.videos-section{padding-top:24px}
+.videos-section .section-top h2{font-size:clamp(27px,3vw,42px)}
+.videos-section .section-copy{margin:7px 0;font-size:12px}
+.feed-summary{font-size:10px}
+@media (max-width:700px){
+  .topbar{min-height:96px;padding:13px 9px 7px;gap:8px}
+  .topbar .brand-wordmark{font-size:29px}
+  .topbar .topnav{justify-content:flex-start}
+  .topbar .topnav a{font-size:10px;padding:8px 12px}
+  .mobile-menu{top:0}
+  .hero,.stats-strip{display:none!important}
+  .videos-section{padding:20px 10px 12px!important}
+  .videos-section .section-top{margin-bottom:13px;gap:8px}
+  .videos-section .section-top h2{font-size:25px;margin:6px 0}
+  .videos-section .section-top .eyebrow{font-size:9px;letter-spacing:1.5px}
+  .videos-section .section-copy{font-size:11px;line-height:1.55}
+  .videos-section .pill{font-size:9px;padding:7px 10px}
+  .video-grid{grid-template-columns:minmax(0,1fr)!important;gap:12px}
+  .video-card{width:100%;max-width:100%;margin:0}
+  .video-cover{width:100%;aspect-ratio:16/9}
+  .video-meta{padding:12px 13px}
+  .video-meta h3{font-size:13px}
+  .controls{gap:7px}
+  .searchbox{width:100%;min-width:100%;min-height:45px}
+  .searchbox input{height:44px}
+  .controls select,.control-button{min-height:42px}
+  .mobile-tabbar b{font-size:18px}
+  .age-card{max-height:calc(100dvh - 20px)}
+}
+@media (max-width:360px){
+  .topbar .brand-wordmark{font-size:24px}
+  .topbar .topnav a{font-size:9px}
+  .age-card{padding:22px 14px!important}
+}
