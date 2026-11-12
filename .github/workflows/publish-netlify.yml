@@ -1,0 +1,46 @@
+name: Publier X-NIGHT QC sur Netlify
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "styles.css"
+      - "app.mjs"
+      - "*.mjs"
+      - "catalog.json"
+      - "_headers"
+      - "netlify.toml"
+      - "netlify/functions/**"
+      - "tools/prepare-public.mjs"
+      - "tests/**"
+      - ".github/workflows/publish-netlify.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: x-night-qc-production
+  cancel-in-progress: true
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Tester le site
+        run: |
+          node --test tests/*.test.mjs
+          node tools/prepare-public.mjs
+          test -s dist/index.html
+          test -s dist/styles.css
+      - name: Deployer uniquement le site Netlify X-NIGHT QC
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: db961e8a-faef-4e00-ab42-345f7558a232
+        run: |
+          if [ -z "$NETLIFY_AUTH_TOKEN" ]; then
+            echo "::error::Le secret GitHub NETLIFY_AUTH_TOKEN est requis pour publier dans le site Netlify existant."
+            exit 1
+          fi
+          npx --yes netlify-cli@latest deploy --prod --no-build --dir=dist --functions=netlify/functions --site="$NETLIFY_SITE_ID" --message="X-NIGHT QC: navigation et grand catalogue"
