@@ -1,0 +1,17 @@
+# Optional free alternative hosting: no Netlify production-deploy credits.
+# Requires connecting this repository to Render and checking Render's content rules.
+services:
+  - type: web
+    name: x-night-qc
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: node tools/prepare-public.mjs
+    startCommand: node render-server.mjs
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
