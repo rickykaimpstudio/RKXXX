@@ -150,3 +150,13 @@ main{max-width:1140px}
  .topbar .brand small{font-size:8px!important}
  .primary-nav a{min-width:65px}
 }
+
+/* Finitions: logo parfaitement au centre, visuels chargés sans clignotement. */
+.topbar .brand{position:absolute!important;left:50%!important;transform:translateX(-50%)!important;width:max-content!important;max-width:calc(100% - 155px)!important;margin:0!important}
+.topbar .header-actions{grid-column:3;grid-row:1}
+.topbar .mobile-menu-toggle{grid-column:1;grid-row:1}
+.video-grid[hidden]{display:none!important}
+@media(max-width:700px){
+  .topbar .brand{max-width:calc(100% - 116px)!important}
+  .topbar .brand-wordmark{font-size:clamp(22px,7vw,32px)!important}
+}
