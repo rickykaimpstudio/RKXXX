@@ -1,19 +1,8 @@
 name: Publier X-NIGHT QC sur Netlify
+# Netlify legacy only. Automatic pushes are disabled to protect the owner's
+# credits. Keep this manual action as an optional rollback, not the primary host.
+# The site's alternative GitHub-to-Render deployment is configured in render.yaml.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "index.html"
-      - "styles.css"
-      - "app.mjs"
-      - "*.mjs"
-      - "catalog.json"
-      - "_headers"
-      - "netlify.toml"
-      - "netlify/functions/**"
-      - "tools/prepare-public.mjs"
-      - "tests/**"
-      - ".github/workflows/publish-netlify.yml"
   workflow_dispatch:
 permissions:
   contents: read
