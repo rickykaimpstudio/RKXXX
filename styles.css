@@ -453,3 +453,29 @@ body{background:#0b0a13}
   .topbar .topnav { scrollbar-width: none; }
   .topbar .topnav a { font-size: 10px; }
 }
+
+/* Navigation paginée X-NIGHT QC : n'affecte ni la taille ni la disposition des vidéos. */
+.page-navigation{
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;
+  column-gap:10px;row-gap:12px;margin:24px 0 8px;padding:17px 12px;
+  border:1px solid #4a354d;border-radius:16px;background:#19131f;
+}
+.page-navigation button{
+  min-height:42px;border:1px solid #644668;border-radius:10px;
+  background:#2a2030;color:#fff4fc;padding:8px 13px;font-size:12px;font-weight:800;
+}
+.page-navigation button:hover:not(:disabled){border-color:#ff77b9;background:#43273d}
+.page-navigation button:disabled{opacity:.42;cursor:default}
+.page-numbers{display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:5px}
+.page-navigation .page-number{min-width:42px}
+.page-navigation .page-number[aria-current=page]{background:#e82c83;color:white;border-color:#e82c83}
+.page-ellipsis{color:#c6b2c9;padding:0 3px}
+.page-jump{display:flex;align-items:center;gap:6px;color:#cdbdd0;font-size:12px;font-weight:800}
+.page-jump input{width:68px;height:42px;text-align:center;border:1px solid #6a4e6c;border-radius:10px;background:#120f18;color:#fff;font-size:13px}
+.page-indicator{flex-basis:100%;font-size:11px;color:#c7b5c8;text-align:center}
+@media(max-width:700px){
+  .page-navigation{margin:17px 0 8px;padding:12px 8px;gap:9px 5px}
+  .page-navigation button{font-size:11px;min-height:42px;padding:8px 10px}
+  .page-navigation .page-number{min-width:37px}
+  .page-jump{width:100%;justify-content:center}
+}
