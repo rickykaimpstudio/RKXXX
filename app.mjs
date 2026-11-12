@@ -18,15 +18,12 @@ $('year').textContent = new Date().getFullYear().toString();
 
 let favorites = [];
 try { const v = JSON.parse(localStorage.getItem('rk-afterdark-favorites-v2') || '[]'); if (Array.isArray(v)) favorites = v.filter(Number.isSafeInteger).slice(0,300); } catch { /* private browsing */ }
-// Privacy: store a time-limited adult declaration only; never retain full birth dates.
-const AGE_CONSENT_KEY = 'rk-afterdark-age-declaration-v2';
-const AGE_DECLARATION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+// Re-display the age entry at the start of each browser session.
+// A previous 30-day localStorage declaration must not hide the new screen.
+const AGE_CONSENT_KEY = 'rk-afterdark-age-session-v3';
 let ageConfirmed = false;
-try {
-  const stamp = Number(localStorage.getItem(AGE_CONSENT_KEY));
-  ageConfirmed = Number.isFinite(stamp) && stamp > 0 &&
-    stamp <= Date.now() && Date.now() - stamp < AGE_DECLARATION_TTL_MS;
-} catch { /* browsing in private mode */ }
+try { ageConfirmed = sessionStorage.getItem(AGE_CONSENT_KEY) === 'confirmed'; }
+catch { /* private browsing */ }
 const state = { items: [], category: 'all', orientation: 'all', sort: 'newest', search: '', page: 1, total: 0, hasNext: false, loading: false, request: 0, active: true, ageConfirmed, favOnly: false, current: null, feature: null };
 const isFav = (id) => favorites.includes(id);
 function element(tag, className = '', text = '') {
@@ -112,7 +109,30 @@ function renderVideos() {
     const id = Number(v.key.replace('adultembed-',''));
     const card = element('article','video-card');
     const cover = element('button','video-cover'); cover.type='button'; cover.setAttribute('aria-label',`Lire la vidéo : ${v.title}`);
-    if(v.thumbnail){const img=element('img');img.src=v.thumbnail;img.alt='Aperçu de la vidéo';img.loading=index<6?'eager':'lazy';if(index<4)img.fetchPriority='high';img.decoding='async';img.referrerPolicy='strict-origin-when-cross-origin';img.addEventListener('error',()=>{img.remove();cover.classList.add('image-unavailable');}); cover.append(img);} else {cover.classList.add('image-unavailable');}
+    if(v.thumbnail){
+      const img=element('img');
+      const alternatives = [v.thumbnail,...(Array.isArray(v.thumbnailAlternatives)?v.thumbnailAlternatives:[])]
+        .filter((value,i,list)=>typeof value==='string' && list.indexOf(value)===i);
+      let attempt=0;
+      img.alt='Aperçu de la vidéo';
+      img.loading=index<6?'eager':'lazy';
+      if(index<4)img.fetchPriority='high';
+      img.decoding='async';
+      // The supplier's image CDN may change or expire individual previews.
+      // Retry only provider-advertised image URLs; never invent or rehost media.
+      img.referrerPolicy='no-referrer';
+      img.addEventListener('error',()=>{
+        attempt+=1;
+        if(attempt<alternatives.length){img.src=alternatives[attempt];return;}
+        img.remove();cover.classList.add('image-unavailable');
+        cover.setAttribute('title','Aperçu momentanément indisponible — toucher pour regarder');
+      });
+      img.src=alternatives[0];
+      cover.append(img);
+    } else {
+      cover.classList.add('image-unavailable');
+      cover.setAttribute('title','Aperçu momentanément indisponible — toucher pour regarder');
+    }
     const play=element('span','video-play','▶');cover.append(play);
     const duration=formatDuration(v.durationSeconds); if(duration)cover.append(element('span','video-duration',duration));
     cover.addEventListener('click',()=>openVideo(v));
@@ -303,7 +323,7 @@ const ageError = $('age-error');
 $('age-form').addEventListener('submit', event => {
   event.preventDefault();
   state.ageConfirmed = true;
-  try { localStorage.setItem(AGE_CONSENT_KEY, String(Date.now())); } catch { /* navigation privée */ }
+  try { sessionStorage.setItem(AGE_CONSENT_KEY, 'confirmed'); } catch { /* navigation privée */ }
   if (ageError) ageError.textContent = '';
   gate.hidden = true;
   app.inert = false;
