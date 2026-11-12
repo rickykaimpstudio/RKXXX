@@ -56,9 +56,9 @@
       <button id="mobile-menu-toggle" type="button" class="mobile-menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Ouvrir le menu">☰</button>
       <a class="brand" href="#top" aria-label="X-NIGHT QC, accueil"><span class="brand-wordmark">X-<b>NIGHT</b> QC</span><small>AFTER DARK · ESPACE 18+</small></a>
       <a class="header-search" href="#search" aria-label="Rechercher des vidéos">⌕</a>
-      <nav class="topnav" aria-label="Navigation principale"><a href="#videos">⌂ Accueil</a><a href="#search">⌕ Recherche</a><a href="#categories">☷ Catégories</a><a href="#favorites-only">♡ Favoris</a><a href="#live">◉ Live</a><a href="#experiences">✧ Studio IA</a><a href="#arcade">♧ Arcade</a><a href="#credits">◈ Crédits RK</a><a href="#vip">✦ VIP</a><a href="#createurs">♙ Créateurs</a><a href="#annonceurs">▤ Partenaires</a></nav>
+      <nav class="topnav" aria-label="Navigation principale"><a href="#videos">⌂ Accueil</a><a href="#search">⌕ Recherche</a><a href="#categories">☷ Catégories</a><a href="#videos" data-feed-sort="popular">↗ Tendances</a><a href="#videos" data-feed-sort="newest">◷ Nouveautés</a><a href="#videos" data-feed-sort="views">◉ Plus vues</a><a href="#videos" data-feed-sort="longest">⌛ Longues</a><a href="#favorites-only" data-nav-favorites="true">♡ Favoris</a><a href="#live">◉ Live</a><a href="#experiences">✧ Studio IA</a><a href="#arcade">♧ Arcade</a><a href="#credits">◈ Crédits RK</a><a href="#vip">✦ VIP</a><a href="#createurs">♙ Créateurs</a><a href="#annonceurs">▤ Partenaires</a></nav>
     </header>
-    <nav class="mobile-menu" id="mobile-menu" hidden aria-label="Menu mobile"><a href="#videos">⌂ Accueil · Vidéos</a><a href="#search">⌕ Recherche</a><a href="#categories">☷ Catégories</a><a href="#favorites-only">♡ Favoris</a><a href="#live">◉ Live</a><a href="#credits">◈ Crédits RK</a><a href="#experiences">✧ Studio IA</a><a href="#arcade">♧ Arcade</a><a href="#vip">✦ VIP</a><a href="#createurs">♙ Créateurs</a><a href="#annonceurs">▤ Partenaires</a></nav>
+    <nav class="mobile-menu" id="mobile-menu" hidden aria-label="Menu mobile"><a href="#videos">⌂ Accueil · Vidéos</a><a href="#search">⌕ Recherche</a><a href="#categories">☷ Catégories</a><a href="#videos" data-feed-sort="popular">↗ Tendances</a><a href="#videos" data-feed-sort="newest">◷ Nouveautés</a><a href="#videos" data-feed-sort="views">◉ Plus vues</a><a href="#videos" data-feed-sort="longest">⌛ Longues</a><a href="#favorites-only" data-nav-favorites="true">♡ Favoris</a><a href="#live">◉ Live</a><a href="#credits">◈ Crédits RK</a><a href="#experiences">✧ Studio IA</a><a href="#arcade">♧ Arcade</a><a href="#vip">✦ VIP</a><a href="#createurs">♙ Créateurs</a><a href="#annonceurs">▤ Partenaires</a></nav>
     <nav class="mobile-tabbar" aria-label="Navigation rapide mobile"><a href="#videos"><b>▣</b><span>Vidéos</span></a><a href="#credits"><b>◈</b><span>Crédits</span></a><a href="#experiences"><b>✧</b><span>Studio IA</span></a><a href="#vip"><b>✦</b><span>VIP</span></a></nav>
     <main id="top">
       <section class="hero" aria-label="After Dark">
@@ -240,6 +240,33 @@
   </div>
   <dialog id="premium-dialog" class="premium-dialog" aria-labelledby="premium-dialog-title"><div class="premium-dialog-body"><div class="premium-dialog-top"><span>AFTER DARK · CRÉDITS RK</span><button id="premium-dialog-close" type="button" aria-label="Fermer">✕</button></div><div class="premium-dialog-icon" aria-hidden="true">◈</div><h2 id="premium-dialog-title">Crédits RK</h2><p id="premium-dialog-copy">Fonctionnalités premium en préparation.</p><button id="premium-dialog-cta" class="button button-hot" type="button">Être averti de l'ouverture</button><small>Aucun paiement ni appel à un fournisseur payant n'est lancé.</small></div></dialog>
   <div id="video-modal" class="viewer" hidden role="dialog" aria-modal="true" aria-label="Lecteur vidéo partenaire"><div class="viewer-inner"><div class="viewer-top"><strong id="video-title">Vidéo</strong><button id="close-modal" type="button" aria-label="Fermer le lecteur">✕</button></div><div id="viewer-frame" class="viewer-frame"></div><div id="player-notice" class="player-notice" role="status" hidden></div></div></div>
+
+  <script>
+    // Actions de navigation qui utilisent les filtres existants du catalogue.
+    // La grille et les lecteurs vidéo ne sont pas modifiés.
+    document.addEventListener('click', function(event) {
+      const sortLink = event.target.closest('a[data-feed-sort]');
+      if (sortLink) {
+        const sort = document.getElementById('sort');
+        const requested = sortLink.getAttribute('data-feed-sort');
+        if (!sort || !Array.from(sort.options).some(option => option.value === requested)) return;
+        event.preventDefault();
+        if (sort.value !== requested) {
+          sort.value = requested;
+          sort.dispatchEvent(new Event('change', {bubbles:true}));
+        }
+        document.getElementById('videos')?.scrollIntoView({behavior:'smooth',block:'start'});
+        return;
+      }
+      const favLink = event.target.closest('a[data-nav-favorites]');
+      if (favLink) {
+        event.preventDefault();
+        const favorites = document.getElementById('favorites-only');
+        favorites?.click();
+        document.getElementById('videos')?.scrollIntoView({behavior:'smooth',block:'start'});
+      }
+    });
+  </script>
 </body>
 </html>
 
