@@ -30,11 +30,7 @@ function thumbnailsFor(row) {
   const candidates = [row.thumbnail, row.thumbnail_url, row.thumb, row.poster, row.image,
     row.cover, row.preview, row.thumbnails?.webp, row.thumbnails?.medium,
     row.thumbnails?.large, row.thumbnails?.[0]?.url, row.thumbnail?.url];
-  for (const candidate of candidates) {
-    const parsed = safeProviderThumbnail(candidate);
-    if (parsed) return parsed;
-  }
-  return null;
+  return [...new Set(candidates.map(safeProviderThumbnail).filter(Boolean))].slice(0,5);
 }
 /** Normalize browse and v1-search response layouts. Never trust provider HTML. */
 export function cleanProviderResult(payload) {
@@ -52,7 +48,9 @@ export function cleanProviderResult(payload) {
     const duration = Number(row.duration_seconds ?? row.length_seconds);
     result.push({
       source: 'AdultEmbed', key: 'adultembed-' + Number(numericId),
-      player, title, category, thumbnail: thumbnailsFor(row),
+      player, title, category,
+      thumbnail: thumbnailsFor(row)[0] || null,
+      thumbnailAlternatives: thumbnailsFor(row).slice(1),
       durationSeconds: Number.isFinite(duration) && duration > 0 && duration < 14400 ? Math.floor(duration) : null,
     });
   }
