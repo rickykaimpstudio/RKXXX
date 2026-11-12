@@ -272,6 +272,29 @@
       }
     });
 
+    // Les raccourcis de la capture pilotent les filtres existants, sans catalogue fictif.
+    document.addEventListener('click', event => {
+      const categoryLink = event.target.closest('a[data-set-category]');
+      if (categoryLink) {
+        event.preventDefault();
+        const value = categoryLink.getAttribute('data-set-category');
+        if (value === 'scene' || value === 'amateur') {
+          const buttons = [...document.querySelectorAll('#categories button')];
+          buttons.find(button => (value === 'scene' ? button.textContent.trim() === 'Studios' : button.textContent.trim() === 'Amateur'))?.click();
+          document.getElementById('videos')?.scrollIntoView({behavior:'smooth',block:'start'});
+        }
+      }
+      const searchLink = event.target.closest('a[data-search-term]');
+      if (searchLink) {
+        event.preventDefault();
+        const search = document.getElementById('search');
+        if (search) {
+          search.value = searchLink.getAttribute('data-search-term') || '';
+          search.dispatchEvent(new Event('input',{bubbles:true}));
+        }
+        document.getElementById('videos')?.scrollIntoView({behavior:'smooth',block:'start'});
+      }
+    });
     // Filtres avancés facultatifs : l'accueil reste centré sur les vidéos.
     const moreFilters = document.getElementById('more-filters-toggle');
     const advancedFilters = document.getElementById('advanced-filters');
