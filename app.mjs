@@ -9,6 +9,8 @@ const DIRECT_API = 'https://adultembed.com/api/database/browse/';
 const BACKUP_API = 'https://adultembed.com/api/v1/search';
 const PAGE_SIZE = 24;
 const MAX_CATALOG_PAGES = 1000;
+const initialPageNumber = Number(new URL(location.href).searchParams.get('page'));
+const initialPage = Number.isSafeInteger(initialPageNumber) && initialPageNumber >= 1 && initialPageNumber <= MAX_CATALOG_PAGES ? initialPageNumber : 1;
 const $ = (id) => document.getElementById(id);
 const gate = $('age-gate');
 const app = $('app');
@@ -174,7 +176,7 @@ async function loadFeed(append=false,requestedPage=1){
   if (state.loading) activeFeedController?.abort();
   state.loading=true;
   const token=++state.request;
-  if(!append){state.page=Math.max(1,Math.min(MAX_CATALOG_PAGES,requestedPage));state.total=0;state.hasNext=false;state.items=[];renderVideos();}
+  if(!append){state.page=Math.max(1,Math.min(MAX_CATALOG_PAGES,requestedPage));state.total=0;state.hasNext=false;state.items=[];const pageUrl=new URL(location.href);if(state.page===1)pageUrl.searchParams.delete('page');else pageUrl.searchParams.set('page',String(state.page));history.replaceState(null,'',pageUrl);renderVideos();}
   $('feed-badge').textContent='◉ CHARGEMENT DES VIDÉOS';
   $('load-more').hidden=true;
   status('Chargement des vraies miniatures…','Connexion au catalogue vidéo partenaire.');
@@ -281,7 +283,7 @@ $('search').addEventListener('input', e=>{
 $('sort').addEventListener('change', e=>{state.sort=['newest','popular','longest','views','likes'].includes(e.target.value)?e.target.value:'newest';loadFeed(false);});
 $('orientation').addEventListener('change', e=>{state.orientation=['all','straight','gay','bi','trans'].includes(e.target.value)?e.target.value:'all';loadFeed(false);});
 $('favorites-only').addEventListener('click',()=>{state.favOnly=!state.favOnly;renderVideos();});
-$('retry-feed').addEventListener('click',()=>loadFeed(false));
+$('retry-feed').addEventListener('click',()=>loadFeed(false,state.page));
 $('load-more').addEventListener('click',()=>goToPage(state.page + 1));
 $('page-prev').addEventListener('click',()=>goToPage(state.page - 1));
 $('page-next').addEventListener('click',()=>goToPage(state.page + 1));
@@ -331,10 +333,10 @@ $('age-form').addEventListener('submit', event => {
   app.inert=false;
   document.body.classList.remove('age-locked');
   window.scrollTo({top:0,behavior:'instant'});
-  void loadFeed(false);
+  void loadFeed(false,initialPage);
 });
 dobInput.addEventListener('input', () => { ageError.textContent=''; ageSubmit.disabled=false; });
-if (state.ageConfirmed) void loadFeed(false);
+if (state.ageConfirmed) void loadFeed(false,initialPage);
 
 const el = element;
 
